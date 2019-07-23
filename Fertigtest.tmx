@@ -3,7 +3,7 @@
  <tileset firstgid="1" name="TIleset1" tilewidth="32" tileheight="32" tilecount="143" columns="11">
   <image source="Texturen/Tileset.png" width="352" height="416"/>
  </tileset>
- <layer id="1" name="Kachelebene 1" width="20" height="20">
+ <layer id="1" name="Kachelebene" width="20" height="20">
   <data encoding="csv">
 14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,
 14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,
@@ -27,7 +27,7 @@
 14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14
 </data>
  </layer>
- <objectgroup id="2" name="Objektebene 1">
+ <objectgroup id="2" name="Objektebene">
   <object id="12" gid="1" x="480" y="160" width="32" height="32"/>
   <object id="13" gid="1" x="480" y="128" width="32" height="32"/>
   <object id="14" gid="1" x="512" y="128" width="32" height="32"/>

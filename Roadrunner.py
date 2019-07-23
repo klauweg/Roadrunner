@@ -7,7 +7,7 @@ from pytmx.util_pygame import load_pygame
 pygame.init()
 
 # create game display
-game_display = pygame.display.set_mode((320, 320))
+game_display = pygame.display.set_mode((640, 640))
 pytmx_map = load_pygame("Fertigtest.tmx") 
 
 # create sprite
@@ -18,7 +18,7 @@ bootpos.x = 166
 bootpos.y = 2
 
 # create Spielfeld:
-background = pygame.Surface((25*32, 25*32))
+background = pygame.Surface((20*32, 20*32))
 
 loop = True
 event = None
@@ -52,18 +52,21 @@ while(loop):
 
     # Darstellung der Hintergrundkacheln und Kollisionsprüfung:
     collision = False
-    baselayer = pytmx_map.get_layer_by_name("Kachelebene 1") # Layer nach Name auswählen
-    for x, y, gid in baselayer:  # Iteriert über alle Kacheln in dem Layer
+    for x, y, gid in pytmx_map.get_layer_by_name("Kachelebene"):
         image = pytmx_map.get_tile_image_by_gid( gid ) # Hier wird die tmx gid verwendet um die Grafik zu bekommen
         background.blit(image, (32*x, 32*y))    # Grafik auf den Hintergrund an die entsprechende Stelle kopieren
-        if pytmx_map.map_gid(3)[0][0] != gid:  # tlied gid auf tmx gid mappen und vergleichen ob kein wasser
-            if pygame.Rect( 32*x, 32*y, 32, 32).colliderect(bootpos): # Kollision neuer Bootposition mit Kachel prüfen
-                collision = True
-
-    if collision: # Falls kollision wird die alte Bootposition verwendet
-        bootpos = oldbootpos
-    if bootpos.x < 0 or bootpos.x > 308 or bootpos.y < 0 or bootpos.y > 308:
-        bootpos = oldbootpos
+    for object in pytmx_map.get_layer_by_name("Objektebene"):
+        background.blit( object.image, ( object.x, object.y ) )
+    for object in pytmx_map.get_layer_by_name("weg"):
+        background.blit( object.image, ( object.x, object.y ) )
+        objectrect = pygame.Rect( object.x, object.y, 32, 32 )
+        
+        print( objectrect )
+    
+    #if collision: # Falls kollision wird die alte Bootposition verwendet
+    #    bootpos = oldbootpos
+    #if bootpos.x < 0 or bootpos.x > 308 or bootpos.y < 0 or bootpos.y > 308:
+    #    bootpos = oldbootpos
         
     game_display.blit(background, (0,0)) # Hintergrund aufs Gamedisplay kopieren
     game_display.blit(boot, bootpos)     # Das Boot ins Gamedisplay kopieren
