@@ -14,8 +14,8 @@ pytmx_map = load_pygame("Fertigtest.tmx")
 boot = pygame.Surface( (16,16) )
 boot.fill( pygame.Color(153,0,0) )
 bootpos = boot.get_rect()
-bootpos.x = 166
-bootpos.y = 2
+bootpos.x = 475
+bootpos.y = 30
 
 # create Spielfeld:
 background = pygame.Surface((20*32, 20*32))
@@ -51,8 +51,9 @@ while(loop):
         bootpos.y += -2
 
     # Darstellung der Hintergrundkacheln und Kollisionsprüfung:
-    playerground = None
-    for x, y, gid in pytmx_map.get_layer_by_name("Kachelebene"):
+    backgroundlayer = pytmx_map.get_layer_by_name("Kachelebene")
+    playerground = backgroundlayer
+    for x, y, gid in backgroundlayer:
         image = pytmx_map.get_tile_image_by_gid( gid ) # Hier wird die tmx gid verwendet um die Grafik zu bekommen
         background.blit(image, (32*x, 32*y))    # Grafik auf den Hintergrund an die entsprechende Stelle kopieren
     for objectgroup in pytmx_map.objectgroups:
@@ -61,12 +62,12 @@ while(loop):
             if pygame.Rect( object.x, object.y, 32, 32 ).colliderect(bootpos):
                 playerground = objectgroup
                 
-    print( playerground )
-    
-    #if collision: # Falls kollision wird die alte Bootposition verwendet
-    #    bootpos = oldbootpos
-    #if bootpos.x < 0 or bootpos.x > 308 or bootpos.y < 0 or bootpos.y > 308:
-    #    bootpos = oldbootpos
+    if playerground.name != "weg":
+        bootpos = oldbootpos
+        print("WIllst du das wirklich?")
+    if bootpos.x < 0 or bootpos.x > 640-32 or bootpos.y < 0 or bootpos.y > 640-32:
+        bootpos = oldbootpos
+        print("nein")
         
     game_display.blit(background, (0,0)) # Hintergrund aufs Gamedisplay kopieren
     game_display.blit(boot, bootpos)     # Das Boot ins Gamedisplay kopieren
