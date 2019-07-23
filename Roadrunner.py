@@ -51,17 +51,17 @@ while(loop):
         bootpos.y += -2
 
     # Darstellung der Hintergrundkacheln und Kollisionsprüfung:
-    collision = False
+    playerground = None
     for x, y, gid in pytmx_map.get_layer_by_name("Kachelebene"):
         image = pytmx_map.get_tile_image_by_gid( gid ) # Hier wird die tmx gid verwendet um die Grafik zu bekommen
         background.blit(image, (32*x, 32*y))    # Grafik auf den Hintergrund an die entsprechende Stelle kopieren
-    for object in pytmx_map.get_layer_by_name("Objektebene"):
-        background.blit( object.image, ( object.x, object.y ) )
-    for object in pytmx_map.get_layer_by_name("weg"):
-        background.blit( object.image, ( object.x, object.y ) )
-        objectrect = pygame.Rect( object.x, object.y, 32, 32 )
-        
-        print( objectrect )
+    for objectgroup in pytmx_map.objectgroups:
+        for object in objectgroup:
+            background.blit( object.image, ( object.x, object.y ) )
+            if pygame.Rect( object.x, object.y, 32, 32 ).colliderect(bootpos):
+                playerground = objectgroup
+                
+    print( playerground )
     
     #if collision: # Falls kollision wird die alte Bootposition verwendet
     #    bootpos = oldbootpos
