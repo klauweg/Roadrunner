@@ -78,18 +78,25 @@ while(loop):
             background.blit( object.image, ( object.x, object.y ) )
             if pygame.Rect( object.x, object.y, 32, 32 ).colliderect(bootpos):
                 playerground = objectgroup
+        
                 
     if playerground.name != "weg":
         if leavetrack:
             leavetrack = False
-            playermessage = "Wenn du den Weg verlässt \n kannst du Monster töten"
+            playermessage = "Wenn du den Weg verlässt kannst du Monster töten"
             pygame.time.set_timer(pygame.USEREVENT, 1000)
     else:
         leavetrack = True
         
+    if playerground.name == "cancleway":
+        playermask = pygame.mask.from_surface(boot)
+        tilemask = pygame.mask.from_surface(object.image)
+        if (playermask.overlap( tilemask, ( 0,0 )) != None):
+            bootpos = oldbootpos
+        
     if bootpos.x < 0 or bootpos.x > 640-32 or bootpos.y < 0 or bootpos.y > 640-32:
         bootpos = oldbootpos
-        print("nein")
+        playermessage = "Die Map ist hier zu Ende."
         
     game_display.blit(background, (0,0)) # Hintergrund aufs Gamedisplay kopieren
     game_display.blit(boot, bootpos)     # Das Boot ins Gamedisplay kopieren
