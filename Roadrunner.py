@@ -24,6 +24,20 @@ loop = True
 event = None
 lastkey = None
 
+fontl = pygame.font.SysFont('Comic Sans MS',60)
+fonts = pygame.font.SysFont('Comic Sans MS',20)
+
+playermessage = ""
+
+leavetrack = True
+
+def textwrite(tx, ty,message,color,font):
+    textsize = font.size(message)
+    text = font.render(message, True, color)
+    game_display.blit(text,(tx-textsize[0]/2,ty-textsize[1]))
+
+
+
 while(loop):
     oldbootpos = bootpos.copy() # Merken falls Kollision stattfindet
     
@@ -36,7 +50,10 @@ while(loop):
             lastkey = event.key
         if event.type == pygame.KEYUP:
             lastkey = None
-
+        if event.type == pygame.USEREVENT:
+            playermessage = ""
+            pygame.time.set_timer(pygame.USEREVENT, 0)
+    
     # Tasten verarbeiten:
     if lastkey == pygame.K_ESCAPE:
         pygame.quit()
@@ -63,13 +80,21 @@ while(loop):
                 playerground = objectgroup
                 
     if playerground.name != "weg":
-        bootpos = oldbootpos
-        print("WIllst du das wirklich?")
+        if leavetrack:
+            leavetrack = False
+            playermessage = "Wenn du den Weg verlässt \n kannst du Monster töten"
+            pygame.time.set_timer(pygame.USEREVENT, 1000)
+    else:
+        leavetrack = True
+        
     if bootpos.x < 0 or bootpos.x > 640-32 or bootpos.y < 0 or bootpos.y > 640-32:
         bootpos = oldbootpos
         print("nein")
         
     game_display.blit(background, (0,0)) # Hintergrund aufs Gamedisplay kopieren
     game_display.blit(boot, bootpos)     # Das Boot ins Gamedisplay kopieren
+    
+    textwrite( bootpos.x+16, bootpos.y-32,playermessage, (0, 0, 0) , fonts)
+    
     pygame.time.Clock().tick(70)
     pygame.display.update()
