@@ -1,5 +1,6 @@
 
 test2
+hallo Felix
 
 import pygame
 import pytmx
