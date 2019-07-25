@@ -142,7 +142,9 @@ while(loop):
     
     for spritegroup in spritegroups.values():
         spritegroup.update()
-        
+
+#hier kommt die collisiondetection
+
     for spritegroup in spritegroups.values():
         spritegroup.draw( game_display )
     
