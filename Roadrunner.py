@@ -51,25 +51,23 @@ class Character(pygame.sprite.Sprite):
     def queuemessage(self, message, time):
         self.messagequeue.insert( 0, ( message, time ) )
     def drawmessage( self, surface ):
+        # Aktuelle Nachricht bearbeiten:
         if self.messagedisplay != None:  # Wird gerade eine Nachricht angezeigt?
             if pygame.time.get_ticks() > self.messageStartTime + self.messagedisplay[1]: # Displayzeit abgelaufen?
                 self.messagedisplay = None  # Dann Nachricht löschen
             else:
-                surface.blit( self.messagedisplay[0], (50,50) )
-                
+                surface.blit( self.messagedisplay[0], self.rect )
+
+        # Neue Nachricht zur Ausgabe vorbereiten:
         if len( self.messagequeue ) > 0 and self.messagedisplay == None: # Noch Nachrichten in der Queue und Platz dafür?
             self.messageStartTime = pygame.time.get_ticks() # Startzeit der neuen Message merken
             message = self.messagequeue.pop() # Oberste Nachricht aus der Queue holen (string, time)
             lines = message[0].split("\n")[:3] # Nachricht in Zeilen aufteilen, die ersten drei Zeilen verwenden
             lines_surf = [ fontss.render(line[:20], True, (0,0,0) ) for line in lines ] # Render ersten 20 zeichen pro Zeile
             message_surf = pygame.Surface( (300, 50), pygame.SRCALPHA ) # Alpha Surface für maximalen Platzbedarf erzeugen
-            i = 0
-            for line_surf in lines_surf:
-                message_surf.blit( line_surf, (0, i*fontss.get_linesize() ) )
-                i=i+1
-            self.messagedisplay = ( message_surf.subsurface( message_surf.get_bounding_rect() ), message[1] )
-            print( self.messagedisplay[0].get_rect() )
-            
+            for i in range(0, len(lines_surf)): # traverse over lines index
+                message_surf.blit( lines_surf[i], (0, i*fontss.get_linesize() ) ) # Zeilen auf Messagesurface mit Abstand blit
+            self.messagedisplay = ( message_surf.subsurface( message_surf.get_bounding_rect() ), message[1] ) # Zuschneiden
 
 
 # create background surface
