@@ -11,6 +11,15 @@ pygame.init()
 game_display = pygame.display.set_mode((640, 640))
 pytmx_map = load_pygame("Fertigtest.tmx") 
 
+
+def displaymessage( surface, message, character_rect ):
+    print("test")
+    font = pygame.font.SysFont('Comic Sans MS',20)
+    textsize = font.size(message)
+    text = font.render(message, True, (0,0,0) )
+    surface.blit(text,(character_rect.x-textsize[0]/2,character_rect.y-textsize[1]))
+    
+
 # invent a moveable Game Character:
 class Character(pygame.sprite.Sprite):
     def __init__(self, image, x, y, speedx, speedy):
@@ -24,6 +33,7 @@ class Character(pygame.sprite.Sprite):
         self.y = self.rect.y
         self.oldx = self.x
         self.oldy = self.y
+        self.message = ""
     def update(self):
         if self.x !=0 or self.y != 0:
             self.oldx = self.x
@@ -40,8 +50,19 @@ class Character(pygame.sprite.Sprite):
     def undo(self):
         self.x = self.oldx
         self.y = self.oldy
-    def draw(self, surface):
-        surface.blit( self.image, self.rect )
+    def setmessage(self, message, time):
+        self.message = message
+        self.messageDisplayTime = time
+        self.messageStartTime = pygame.time.get_ticks()
+    def draw(surface):
+        pass
+#        surface.blit( self.image, self.rect )
+#        print( vars( self ))
+#        if self.message != "":
+#            displaymessage( surface, self.message, self.rect )
+#            if pygame.time.get_ticks() > self.messageStartTime + self.messageDisplayTime:
+#                self.message = ""
+
 
 # create background surface
 background_surf = pygame.Surface((20*32, 20*32))
@@ -68,6 +89,7 @@ spritegroups['player'] = pygame.sprite.Group()
 player_surf=pygame.Surface( (16,16) )
 player_surf.fill( pygame.Color( 0,164,200 ) )
 player = Character( player_surf, 400, 400, 0, 0 )
+player.setmessage("hallo",5000)
 spritegroups['player'].add( player )
 
 
@@ -76,17 +98,8 @@ loop = True
 event = None
 lastkey = None
 
-fontl = pygame.font.SysFont('Comic Sans MS',60)
-fonts = pygame.font.SysFont('Comic Sans MS',20)
-
-playermessage = ""
 
 leavetrack = True
-
-def textwrite(tx, ty,message,color,font):
-    textsize = font.size(message)
-    text = font.render(message, True, color)
-    game_display.blit(text,(tx-textsize[0]/2,ty-textsize[1]))
 
 
 
@@ -100,9 +113,6 @@ while(loop):
             lastkey = event.key
         if event.type == pygame.KEYUP:
             lastkey = None
-        if event.type == pygame.USEREVENT:
-            playermessage = ""
-            pygame.time.set_timer(pygame.USEREVENT, 0)
     
     # Tasten verarbeiten:
     if lastkey == pygame.K_ESCAPE:
