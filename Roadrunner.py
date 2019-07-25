@@ -11,6 +11,9 @@ pygame.init()
 game_display = pygame.display.set_mode((640, 640))
 pytmx_map = load_pygame("Fertigtest.tmx") 
 
+fontl = pygame.font.SysFont('Comic Sans MS',60)
+fonts = pygame.font.SysFont('Comic Sans MS',20)
+fontss = pygame.font.SysFont('Arial',15)
 
 def displaymessage( surface, message, character_rect ):
     print("test")
@@ -33,7 +36,8 @@ class Character(pygame.sprite.Sprite):
         self.y = self.rect.y
         self.oldx = self.x
         self.oldy = self.y
-        self.message = ""
+        self.messagequeue = []
+        self.messagedisplay = None
     def update(self):
         if self.x !=0 or self.y != 0:
             self.oldx = self.x
@@ -50,15 +54,21 @@ class Character(pygame.sprite.Sprite):
     def undo(self):
         self.x = self.oldx
         self.y = self.oldy
-    def setmessage(self, message, time):
-        self.message = message
-        self.messageDisplayTime = time
-        self.messageStartTime = pygame.time.get_ticks()
-#    def draw(surface):
-#        pass
-#        surface.blit( self.image, self.rect )
-#        print( vars( self ))
-#        if self.message != "":
+    def queuemessage(self, message, time):
+        self.messagequeue.insert( 0, ( message, time ) )
+    def drawmessage( self ):
+        if self.messagedisplay != None:  # Wird gerade eine Nachricht angezeigt?
+            if pygame.time.get_ticks() > self.messageStartTime + self.messagedisplay[1]: # Displayzeit abgelaufen?
+                self.messagedisplay = None  # Dann Nachricht löschen
+                
+        if len( self.messagequeue ) > 0 and self.messagedisplay == None: # Noch Nachrichten in der Queue und Platz dafür?
+            self.messageStartTime = pygame.time.get_ticks() # Startzeit der Message merken
+            self.messagedisplay = self.messagequeue.pop() # Oberste Nachricht aus der Queue in die aktuelle Anzeige
+            
+        if self.messagedisplay != None:  # Nachricht anzuzeigen?
+            print( self.messagedisplay[0] )
+            
+#            print("message")
 #            displaymessage( surface, self.message, self.rect )
 #            if pygame.time.get_ticks() > self.messageStartTime + self.messageDisplayTime:
 #                self.message = ""
@@ -89,7 +99,9 @@ spritegroups['player'] = pygame.sprite.Group()
 player_surf=pygame.Surface( (16,16) )
 player_surf.fill( pygame.Color( 0,164,200 ) )
 player = Character( player_surf, 400, 400, 0, 0 )
-player.setmessage("hallo",5000)
+player.queuemessage("hallo\n2.zeile",5000)
+player.queuemessage("2. nachricht",5000)
+player.queuemessage("3. nachricht",5000)
 spritegroups['player'].add( player )
 
 
@@ -156,6 +168,9 @@ while(loop):
     for spritegroup in spritegroups.values():
         spritegroup.draw( game_display )
     
+    # Nachrichten ausgeben:
+    for sprite in spritegroups['player']:
+        sprite.drawmessage()
     
 #    textwrite( bootpos.x+16, bootpos.y-32,playermessage, (0, 0, 0) , fonts)
     
