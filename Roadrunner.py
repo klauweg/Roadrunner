@@ -17,7 +17,7 @@ class Character(pygame.sprite.Sprite):
        pygame.sprite.Sprite.__init__(self)        # Call the parent class (Sprite) constructor
        self.image = image
        self.rect = self.image.get_rect()
-
+       self.rect.topleft = (x,y)
 
 # create background layer
 background_surf = pygame.Surface((20*32, 20*32))
@@ -25,14 +25,12 @@ for x, y, gid in pytmx_map.get_layer_by_name("Kachelebene"):
     image = pytmx_map.get_tile_image_by_gid( gid ) # Hier wird die tmx gid verwendet um die Grafik zu bekommen
     background_surf.blit(image, (32*x, 32*y))    # Grafik auf den Hintergrund an die entsprechende Stelle kopieren
 
-spritegroups={}
 # create sprite groups
+spritegroups={}
 for objectgroup in pytmx_map.objectgroups:
     spritegroups[objectgroup.name]=pygame.sprite.Group()
     for object in objectgroup:
         spritegroups[objectgroup.name].add( Character( object.image, object.x, object.y ) )
-
-print( spritegroups )
 
 
 
@@ -91,12 +89,6 @@ while(loop):
     elif lastkey == pygame.K_UP:
         bootpos.y += -2
 
-    # Darstellung der Hintergrundkacheln und Kollisionsprüfung:
-#    for objectgroup in pytmx_map.objectgroups:
-#        for object in objectgroup:
-#            background.blit( object.image, ( object.x, object.y ) )
-#            if pygame.Rect( object.x, object.y, 32, 32 ).colliderect(bootpos):
-#                playerground = objectgroup
         
                 
 #    if playerground.name != "weg":
@@ -118,6 +110,10 @@ while(loop):
 #        playermessage = "Die Map ist hier zu Ende."
         
     game_display.blit(background_surf, (0,0)) # Hintergrund aufs Gamedisplay kopieren
+    
+    for spritegroup in spritegroups.values():
+        spritegroup.draw( game_display )
+    
     game_display.blit(boot, bootpos)     # Das Boot ins Gamedisplay kopieren
     
 #    textwrite( bootpos.x+16, bootpos.y-32,playermessage, (0, 0, 0) , fonts)
