@@ -11,17 +11,11 @@ pygame.init()
 game_display = pygame.display.set_mode((640, 640))
 pytmx_map = load_pygame("Fertigtest.tmx") 
 
+# Define Fonts:
 fontl = pygame.font.SysFont('Comic Sans MS',60)
 fonts = pygame.font.SysFont('Comic Sans MS',20)
 fontss = pygame.font.SysFont('Arial',15)
 
-def displaymessage( surface, message, character_rect ):
-    print("test")
-    font = pygame.font.SysFont('Comic Sans MS',20)
-    textsize = font.size(message)
-    text = font.render(message, True, (0,0,0) )
-    surface.blit(text,(character_rect.x-textsize[0]/2,character_rect.y-textsize[1]))
-    
 
 # invent a moveable Game Character:
 class Character(pygame.sprite.Sprite):
@@ -56,22 +50,26 @@ class Character(pygame.sprite.Sprite):
         self.y = self.oldy
     def queuemessage(self, message, time):
         self.messagequeue.insert( 0, ( message, time ) )
-    def drawmessage( self ):
+    def drawmessage( self, surface ):
         if self.messagedisplay != None:  # Wird gerade eine Nachricht angezeigt?
             if pygame.time.get_ticks() > self.messageStartTime + self.messagedisplay[1]: # Displayzeit abgelaufen?
                 self.messagedisplay = None  # Dann Nachricht löschen
+            else:
+                surface.blit( self.messagedisplay[0], (50,50) )
                 
         if len( self.messagequeue ) > 0 and self.messagedisplay == None: # Noch Nachrichten in der Queue und Platz dafür?
-            self.messageStartTime = pygame.time.get_ticks() # Startzeit der Message merken
-            self.messagedisplay = self.messagequeue.pop() # Oberste Nachricht aus der Queue in die aktuelle Anzeige
+            self.messageStartTime = pygame.time.get_ticks() # Startzeit der neuen Message merken
+            message = self.messagequeue.pop() # Oberste Nachricht aus der Queue holen (string, time)
+            lines = message[0].split("\n")[:3] # Nachricht in Zeilen aufteilen, die ersten drei Zeilen verwenden
+            lines_surf = [ fontss.render(line[:20], True, (0,0,0) ) for line in lines ] # Render ersten 20 zeichen pro Zeile
+            message_surf = pygame.Surface( (300, 50), pygame.SRCALPHA ) # Alpha Surface für maximalen Platzbedarf erzeugen
+            i = 0
+            for line_surf in lines_surf:
+                message_surf.blit( line_surf, (0, i*fontss.get_linesize() ) )
+                i=i+1
+            self.messagedisplay = ( message_surf.subsurface( message_surf.get_bounding_rect() ), message[1] )
+            print( self.messagedisplay[0].get_rect() )
             
-        if self.messagedisplay != None:  # Nachricht anzuzeigen?
-            print( self.messagedisplay[0] )
-            
-#            print("message")
-#            displaymessage( surface, self.message, self.rect )
-#            if pygame.time.get_ticks() > self.messageStartTime + self.messageDisplayTime:
-#                self.message = ""
 
 
 # create background surface
@@ -170,9 +168,8 @@ while(loop):
     
     # Nachrichten ausgeben:
     for sprite in spritegroups['player']:
-        sprite.drawmessage()
+        sprite.drawmessage( game_display )
     
-#    textwrite( bootpos.x+16, bootpos.y-32,playermessage, (0, 0, 0) , fonts)
     
     pygame.time.Clock().tick(70)
     pygame.display.update()
