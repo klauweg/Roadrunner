@@ -3,12 +3,38 @@ import pygame
 import pytmx
 from pytmx.util_pygame import load_pygame
 
+    
 # initialize pygame
 pygame.init()
 
 # create game display
 game_display = pygame.display.set_mode((640, 640))
 pytmx_map = load_pygame("Fertigtest.tmx") 
+
+
+class Character(pygame.sprite.Sprite):
+    def __init__(self, image, x, y):
+       pygame.sprite.Sprite.__init__(self)        # Call the parent class (Sprite) constructor
+       self.image = image
+       self.rect = self.image.get_rect()
+
+
+# create background layer
+background_surf = pygame.Surface((20*32, 20*32))
+for x, y, gid in pytmx_map.get_layer_by_name("Kachelebene"):
+    image = pytmx_map.get_tile_image_by_gid( gid ) # Hier wird die tmx gid verwendet um die Grafik zu bekommen
+    background_surf.blit(image, (32*x, 32*y))    # Grafik auf den Hintergrund an die entsprechende Stelle kopieren
+
+spritegroups={}
+# create sprite groups
+for objectgroup in pytmx_map.objectgroups:
+    spritegroups[objectgroup.name]=pygame.sprite.Group()
+    for object in objectgroup:
+        spritegroups[objectgroup.name].add( Character( object.image, object.x, object.y ) )
+
+print( spritegroups )
+
+
 
 # create sprite
 boot = pygame.Surface( (16,16) )
@@ -17,8 +43,6 @@ bootpos = boot.get_rect()
 bootpos.x = 475
 bootpos.y = 30
 
-# create Spielfeld:
-background = pygame.Surface((20*32, 20*32))
 
 loop = True
 event = None
@@ -68,40 +92,35 @@ while(loop):
         bootpos.y += -2
 
     # Darstellung der Hintergrundkacheln und Kollisionsprüfung:
-    backgroundlayer = pytmx_map.get_layer_by_name("Kachelebene")
-    playerground = backgroundlayer
-    for x, y, gid in backgroundlayer:
-        image = pytmx_map.get_tile_image_by_gid( gid ) # Hier wird die tmx gid verwendet um die Grafik zu bekommen
-        background.blit(image, (32*x, 32*y))    # Grafik auf den Hintergrund an die entsprechende Stelle kopieren
-    for objectgroup in pytmx_map.objectgroups:
-        for object in objectgroup:
-            background.blit( object.image, ( object.x, object.y ) )
-            if pygame.Rect( object.x, object.y, 32, 32 ).colliderect(bootpos):
-                playerground = objectgroup
+#    for objectgroup in pytmx_map.objectgroups:
+#        for object in objectgroup:
+#            background.blit( object.image, ( object.x, object.y ) )
+#            if pygame.Rect( object.x, object.y, 32, 32 ).colliderect(bootpos):
+#                playerground = objectgroup
         
                 
-    if playerground.name != "weg":
-        if leavetrack:
-            leavetrack = False
-            playermessage = "Wenn du den Weg verlässt kannst du Monster töten"
-            pygame.time.set_timer(pygame.USEREVENT, 1000)
-    else:
-        leavetrack = True
+#    if playerground.name != "weg":
+#        if leavetrack:
+#            leavetrack = False
+#            playermessage = "Wenn du den Weg verlässt kannst du Monster töten"
+#            pygame.time.set_timer(pygame.USEREVENT, 1000)
+#    else:
+#        leavetrack = True
         
-    if playerground.name == "cancleway":
-        playermask = pygame.mask.from_surface(boot)
-        tilemask = pygame.mask.from_surface(object.image)
-        if (playermask.overlap( tilemask, ( 0,0 )) != None):
-            bootpos = oldbootpos
+#    if playerground.name == "cancleway":
+#        playermask = pygame.mask.from_surface(boot)
+#        tilemask = pygame.mask.from_surface(object.image)
+#        if (playermask.overlap( tilemask, ( 0,0 )) != None):
+#            bootpos = oldbootpos
+#        
+#    if bootpos.x < 0 or bootpos.x > 640-32 or bootpos.y < 0 or bootpos.y > 640-32:
+#        bootpos = oldbootpos
+#        playermessage = "Die Map ist hier zu Ende."
         
-    if bootpos.x < 0 or bootpos.x > 640-32 or bootpos.y < 0 or bootpos.y > 640-32:
-        bootpos = oldbootpos
-        playermessage = "Die Map ist hier zu Ende."
-        
-    game_display.blit(background, (0,0)) # Hintergrund aufs Gamedisplay kopieren
+    game_display.blit(background_surf, (0,0)) # Hintergrund aufs Gamedisplay kopieren
     game_display.blit(boot, bootpos)     # Das Boot ins Gamedisplay kopieren
     
-    textwrite( bootpos.x+16, bootpos.y-32,playermessage, (0, 0, 0) , fonts)
+#    textwrite( bootpos.x+16, bootpos.y-32,playermessage, (0, 0, 0) , fonts)
     
     pygame.time.Clock().tick(70)
     pygame.display.update()
