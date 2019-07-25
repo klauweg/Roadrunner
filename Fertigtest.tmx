@@ -1,7 +1,99 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="238">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="260">
  <tileset firstgid="1" name="TIleset1" tilewidth="32" tileheight="32" tilecount="143" columns="11">
   <image source="Texturen/Tileset.png" width="352" height="416"/>
+  <terraintypes>
+   <terrain name="Weg" tile="51"/>
+   <terrain name="Weg2" tile="35"/>
+   <terrain name="wasser" tile="1"/>
+   <terrain name="Wasser2" tile="48"/>
+   <terrain name="Wasser3" tile="94"/>
+   <terrain name="Wasser4" tile="42"/>
+  </terraintypes>
+  <tile id="0" terrain="2,2,2,2"/>
+  <tile id="1" terrain=",2,,2"/>
+  <tile id="2" terrain="2,,2,"/>
+  <tile id="3" terrain=",,2,2"/>
+  <tile id="5" terrain="1,1,,"/>
+  <tile id="6" terrain="1,,1,"/>
+  <tile id="7" terrain=",,,1"/>
+  <tile id="8" terrain=",,1,"/>
+  <tile id="9" terrain=",0,,0"/>
+  <tile id="10" terrain="0,,0,"/>
+  <tile id="11" terrain=",,,2"/>
+  <tile id="12" terrain=",,2,"/>
+  <tile id="14" terrain="2,2,,"/>
+  <tile id="16" terrain=",1,,1"/>
+  <tile id="17" terrain=",,1,1"/>
+  <tile id="18" terrain=",1,,"/>
+  <tile id="19" terrain="1,,,"/>
+  <tile id="21" terrain=",,0,0"/>
+  <tile id="22" terrain=",2,,"/>
+  <tile id="23" terrain="2,,,"/>
+  <tile id="29" terrain="1,1,1,"/>
+  <tile id="30" terrain="1,1,,1"/>
+  <tile id="32" terrain="0,0,,"/>
+  <tile id="35" terrain="1,1,1,1"/>
+  <tile id="36" terrain="3,,3,"/>
+  <tile id="37" terrain=",,3,3"/>
+  <tile id="38" terrain="2,2,2,"/>
+  <tile id="39" terrain="2,2,,2"/>
+  <tile id="40" terrain="1,,1,1"/>
+  <tile id="41" terrain=",1,1,1"/>
+  <tile id="42" terrain=",5,,5"/>
+  <tile id="43" terrain="5,,5,"/>
+  <tile id="45" terrain=",,,3"/>
+  <tile id="46" terrain=",,3,"/>
+  <tile id="47" terrain="3,3,,"/>
+  <tile id="48" terrain=",3,,3"/>
+  <tile id="49" terrain="2,,2,2"/>
+  <tile id="50" terrain=",2,2,2"/>
+  <tile id="51" terrain="0,0,0,0"/>
+  <tile id="52" terrain="0,,0,0">
+   <objectgroup draworder="index">
+    <object id="1" x="0" y="0">
+     <polygon points="0,0 0,12 32,13 32,0"/>
+    </object>
+   </objectgroup>
+  </tile>
+  <tile id="53" terrain="0,0,0,"/>
+  <tile id="54" terrain=",,5,5"/>
+  <tile id="56" terrain=",3,,"/>
+  <tile id="57" terrain="3,,,"/>
+  <tile id="60" terrain="3,3,3,"/>
+  <tile id="61" terrain="3,3,,3"/>
+  <tile id="62" terrain="4,4,4,"/>
+  <tile id="63" terrain="4,4,,4"/>
+  <tile id="64" terrain="0,0,,0"/>
+  <tile id="65" terrain="5,5,,"/>
+  <tile id="67" terrain="3,3,3,3"/>
+  <tile id="68" terrain="4,4,4,4"/>
+  <tile id="71" terrain="3,,3,3"/>
+  <tile id="72" terrain=",3,3,3"/>
+  <tile id="73" terrain="4,,4,4"/>
+  <tile id="74" terrain=",4,4,4"/>
+  <tile id="75" terrain=",,,0"/>
+  <tile id="76" terrain=",,0,"/>
+  <tile id="77" terrain=",0,0,0"/>
+  <tile id="78" terrain="5,5,5,5"/>
+  <tile id="82" terrain="4,,4,"/>
+  <tile id="83" terrain="4,4,,"/>
+  <tile id="84" terrain=",,,4"/>
+  <tile id="85" terrain=",,4,"/>
+  <tile id="86" terrain=",0,,"/>
+  <tile id="87" terrain="0,,,"/>
+  <tile id="93" terrain=",,4,4"/>
+  <tile id="94" terrain=",4,,4"/>
+  <tile id="95" terrain=",4,,"/>
+  <tile id="96" terrain="4,,,"/>
+  <tile id="127" terrain="5,5,5,"/>
+  <tile id="128" terrain="5,5,,5"/>
+  <tile id="129" terrain=",,,5"/>
+  <tile id="138" terrain="5,,5,5"/>
+  <tile id="139" terrain=",5,5,5"/>
+  <tile id="140" terrain=",5,,"/>
+  <tile id="141" terrain=",,5,"/>
+  <tile id="142" terrain="5,,,"/>
  </tileset>
  <layer id="1" name="Kachelebene" width="20" height="20">
   <data encoding="csv">
@@ -12,7 +104,7 @@
 14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,
 14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,
 14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,
-14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,
+14,14,14,26,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,
 14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,
 14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,
 14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,
@@ -168,19 +260,6 @@
   <object id="91" gid="52" x="256" y="544" width="32" height="32"/>
   <object id="92" gid="52" x="288" y="544" width="32" height="32"/>
   <object id="93" gid="52" x="320" y="544" width="32" height="32"/>
-  <object id="95" gid="80" x="480" y="256" width="32" height="32"/>
-  <object id="96" gid="80" x="480" y="224" width="32" height="32"/>
-  <object id="97" gid="80" x="480" y="192" width="32" height="32"/>
-  <object id="99" gid="80" x="480" y="64" width="32" height="32"/>
-  <object id="100" gid="80" x="480" y="96" width="32" height="32"/>
-  <object id="101" gid="80" x="480" y="128" width="32" height="32"/>
-  <object id="102" gid="60" x="480" y="160" width="32" height="32"/>
-  <object id="103" gid="79" x="512" y="160" width="32" height="32"/>
-  <object id="104" gid="79" x="544" y="160" width="32" height="32"/>
-  <object id="105" gid="79" x="576" y="160" width="32" height="32"/>
-  <object id="106" gid="79" x="448" y="160" width="32" height="32"/>
-  <object id="107" gid="79" x="416" y="160" width="32" height="32"/>
-  <object id="108" gid="79" x="384" y="160" width="32" height="32"/>
   <object id="156" gid="52" x="352" y="544" width="32" height="32"/>
   <object id="157" gid="52" x="384" y="544" width="32" height="32"/>
   <object id="158" gid="22" x="352" y="512" width="32" height="32"/>
@@ -231,5 +310,18 @@
   <object id="205" gid="33" x="320" y="576" width="32" height="32"/>
   <object id="206" gid="33" x="384" y="576" width="32" height="32"/>
   <object id="237" gid="22" x="384" y="512" width="32" height="32"/>
+  <object id="246" gid="71" x="480" y="256" width="32" height="32"/>
+  <object id="247" gid="71" x="480" y="224" width="32" height="32"/>
+  <object id="248" gid="71" x="480" y="192" width="32" height="32"/>
+  <object id="249" gid="71" x="480" y="160" width="32" height="32"/>
+  <object id="250" gid="71" x="480" y="128" width="32" height="32"/>
+  <object id="251" gid="71" x="480" y="96" width="32" height="32"/>
+  <object id="252" gid="71" x="480" y="64" width="32" height="32"/>
+  <object id="253" gid="70" x="512" y="160" width="32" height="32"/>
+  <object id="254" gid="70" x="448" y="160" width="32" height="32"/>
+  <object id="255" gid="70" x="416" y="160" width="32" height="32"/>
+  <object id="256" gid="70" x="384" y="160" width="32" height="32"/>
+  <object id="257" gid="70" x="544" y="160" width="32" height="32"/>
+  <object id="258" gid="70" x="576" y="160" width="32" height="32"/>
  </objectgroup>
 </map>

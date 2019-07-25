@@ -67,7 +67,7 @@ spritegroups['npc'].add( Character( player_surf, 1, 30, 0.4, 0.3 ) )
 spritegroups['player'] = pygame.sprite.Group()
 player_surf=pygame.Surface( (16,16) )
 player_surf.fill( pygame.Color( 0,164,200 ) )
-player = Character( player_surf, 400, 400, 0, 0 )
+player = Character( player_surf, 300, 400, 0, 0 )
 spritegroups['player'].add( player )
 
 
