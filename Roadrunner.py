@@ -42,6 +42,11 @@ class Character(pygame.sprite.Sprite):
         self.y = self.oldy
     def draw(self, surface):
         surface.blit( self.image, self.rect )
+    def textwrite(self,message,color):
+        text = fontss.render(message, True, color)
+        textpos = pygame.font.Font.size(fontss, message)
+        game_display.blit(text,(self.x-textpos[0]/2+8,self.y-40))
+        pygame.time.set_timer(2, 1000)
 
 # create background surface
 background_surf = pygame.Surface((20*32, 20*32))
@@ -78,15 +83,12 @@ lastkey = None
 
 fontl = pygame.font.SysFont('Comic Sans MS',60)
 fonts = pygame.font.SysFont('Comic Sans MS',20)
+fontss = pygame.font.SysFont('Arial',15)
 
-playermessage = ""
 
 leavetrack = True
 
-def textwrite(tx, ty,message,color,font):
-    textsize = font.size(message)
-    text = font.render(message, True, color)
-    game_display.blit(text,(tx-textsize[0]/2,ty-textsize[1]))
+
 
 
 
@@ -140,12 +142,14 @@ while(loop):
         
     game_display.blit(background_surf, (0,0)) # Hintergrund aufs Gamedisplay kopieren
     
+    
     for spritegroup in spritegroups.values():
         spritegroup.update()
         
     for spritegroup in spritegroups.values():
         spritegroup.draw( game_display )
     
+    player.textwrite("lol",(255,255,255))
     
 #    textwrite( bootpos.x+16, bootpos.y-32,playermessage, (0, 0, 0) , fonts)
     
