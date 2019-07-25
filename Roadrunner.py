@@ -54,8 +54,8 @@ class Character(pygame.sprite.Sprite):
         self.message = message
         self.messageDisplayTime = time
         self.messageStartTime = pygame.time.get_ticks()
-    def draw(surface):
-        pass
+#    def draw(surface):
+#        pass
 #        surface.blit( self.image, self.rect )
 #        print( vars( self ))
 #        if self.message != "":
