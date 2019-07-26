@@ -7,8 +7,9 @@ from pytmx.util_pygame import load_pygame
 # initialize pygame
 pygame.init()
 
+game_dimensions = (640,640)
 # create game display
-game_display = pygame.display.set_mode((640, 640))
+game_display = pygame.display.set_mode( game_dimensions )
 pytmx_map = load_pygame("Fertigtest.tmx") 
 
 # Define Fonts:
@@ -16,8 +17,7 @@ fontl = pygame.font.SysFont('Comic Sans MS',60)
 fonts = pygame.font.SysFont('Comic Sans MS',20)
 fontss = pygame.font.SysFont('Arial',15)
 
-
-# invent a moveable Game Character:
+# Invent a moveable Game Character:
 class Character(pygame.sprite.Sprite):
     def __init__(self, image, x, y, speedx, speedy):
         pygame.sprite.Sprite.__init__(self)        # Call the parent class (Sprite) constructor
@@ -32,7 +32,7 @@ class Character(pygame.sprite.Sprite):
         self.oldy = self.y
         self.messagequeue = []
         self.messagedisplay = None
-    def update(self):
+    def update(self): # Neue Position aufgrund der gesetzten Geschwindigkeit ermitteln
         if self.x !=0 or self.y != 0:
             self.oldx = self.x
             self.oldy = self.y
@@ -40,24 +40,28 @@ class Character(pygame.sprite.Sprite):
             self.y = self.y + self.speedy
             self.rect.x = int(self.x)
             self.rect.y = int(self.y)
-    def moveby(self, x, y):
+    def moveby(self, x, y): # Um einen bestimmten Vektor verschieben
         self.oldx = self.x
         self.oldy = self.y
         self.x = self.x + x
         self.y = self.y + y
-    def undo(self):
+    def undo(self):          # Letzte Bewegung rückgängig machen
         self.x = self.oldx
         self.y = self.oldy
-    def queuemessage(self, message, time):
+    def queuemessage(self, message, time):  # Anzuzeigende Message in der Queue speichern
         self.messagequeue.insert( 0, ( message, time ) )
-    def drawmessage( self, surface ):
+    def drawmessage( self, surface ):      # Per Frame aufrufen um die Messages auszugeben
         # Aktuelle Nachricht bearbeiten:
         if self.messagedisplay != None:  # Wird gerade eine Nachricht angezeigt?
             if pygame.time.get_ticks() > self.messageStartTime + self.messagedisplay[1]: # Displayzeit abgelaufen?
                 self.messagedisplay = None  # Dann Nachricht löschen
             else:
-                surface.blit( self.messagedisplay[0], self.rect )
-
+                # Ausgabe der Nachricht:
+                x = self.rect.x + self.rect.width/2 - self.messagedisplay[0].get_rect().width/2 # mittelzentriert
+                y = self.rect.y - self.messagedisplay[0].get_rect().height - 5 # texthöhe berücksichtigen
+                x = min(game_dimensions[0] - self.messagedisplay[0].get_rect().width - 2, max(2, x)) # clamp to border
+                y = min(game_dimensions[1] - self.messagedisplay[0].get_rect().height - 2, max(2, y)) # clamp to border
+                surface.blit( self.messagedisplay[0], (x,y) ) # auf die angegebene Surface kopieren
         # Neue Nachricht zur Ausgabe vorbereiten:
         if len( self.messagequeue ) > 0 and self.messagedisplay == None: # Noch Nachrichten in der Queue und Platz dafür?
             self.messageStartTime = pygame.time.get_ticks() # Startzeit der neuen Message merken
@@ -70,13 +74,13 @@ class Character(pygame.sprite.Sprite):
             self.messagedisplay = ( message_surf.subsurface( message_surf.get_bounding_rect() ), message[1] ) # Zuschneiden
 
 
-# create background surface
+# create background surface aus der Tilemap
 background_surf = pygame.Surface((20*32, 20*32))
 for x, y, gid in pytmx_map.get_layer_by_name("Kachelebene"):
     image = pytmx_map.get_tile_image_by_gid( gid ) # Hier wird die tmx gid verwendet um die Grafik zu bekommen
     background_surf.blit(image, (32*x, 32*y))    # Grafik auf den Hintergrund an die entsprechende Stelle kopieren
 
-# create sprite groups
+# create sprite groups aus der Tilemap
 spritegroups={}
 for objectgroup in pytmx_map.objectgroups:
     spritegroups[objectgroup.name]=pygame.sprite.Group()
@@ -87,17 +91,26 @@ for objectgroup in pytmx_map.objectgroups:
 spritegroups['npc'] = pygame.sprite.Group()
 player_surf=pygame.Surface( (16,16) )
 player_surf.fill( pygame.Color( 164,0,0 ) )
-spritegroups['npc'].add( Character( player_surf, 75, 10, 0.5, 0.5 ) )
-spritegroups['npc'].add( Character( player_surf, 400, 30, 0.2, 0.1 ) )
-spritegroups['npc'].add( Character( player_surf, 1, 30, 0.4, 0.3 ) )
+npc1 = Character( player_surf, 75, 10, 0.5, 0.5 )
+npc1.queuemessage("ich bin\nnpc1", 20000)
+npc2 = Character( player_surf, 400, 30, 0.2, 0.1 )
+npc2.queuemessage("ich bin\nnpc2", 22000)
+npc3 = Character( player_surf, 100, 30, -0.2, 0.1 )
+npc3.queuemessage("ich bin\nnpc3", 24000)
+npc4 = Character( player_surf, 400, 300, -0.2, -0.1 )
+npc4.queuemessage("ich bin\nnpc4",26000)
+spritegroups['npc'].add( npc1 )
+spritegroups['npc'].add( npc2 )
+spritegroups['npc'].add( npc3 )
+spritegroups['npc'].add( npc4 )
 
 spritegroups['player'] = pygame.sprite.Group()
 player_surf=pygame.Surface( (16,16) )
 player_surf.fill( pygame.Color( 0,164,200 ) )
 player = Character( player_surf, 400, 400, 0, 0 )
 player.queuemessage("hallo\n2.zeile",5000)
-player.queuemessage("2. nachricht",5000)
-player.queuemessage("3. nachricht",5000)
+player.queuemessage("2. nachricht",15000)
+player.queuemessage("3. nachricht",15000)
 spritegroups['player'].add( player )
 
 
@@ -105,12 +118,6 @@ spritegroups['player'].add( player )
 loop = True
 event = None
 lastkey = None
-
-
-leavetrack = True
-
-
-
 while(loop):
     # Bearbeiten der Message Queue:
     for event in pygame.event.get():
@@ -156,16 +163,18 @@ while(loop):
 #        bootpos = oldbootpos
 #        playermessage = "Die Map ist hier zu Ende."
         
-    game_display.blit(background_surf, (0,0)) # Hintergrund aufs Gamedisplay kopieren
     
     for spritegroup in spritegroups.values():
         spritegroup.update()
         
-    for spritegroup in spritegroups.values():
+    game_display.blit(background_surf, (0,0)) # Hintergrund aufs Gamedisplay kopieren
+    
+    for spritegroup in spritegroups.values():  # Objekte darstellen
         spritegroup.draw( game_display )
     
-    # Nachrichten ausgeben:
-    for sprite in spritegroups['player']:
+    for sprite in spritegroups['player']:    # Nachrichten ausgeben
+        sprite.drawmessage( game_display )
+    for sprite in spritegroups['npc']:    # Nachrichten ausgeben
         sprite.drawmessage( game_display )
     
     
