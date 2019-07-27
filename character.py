@@ -1,5 +1,4 @@
 import pygame
-import globalconf
 
 # Invent a moveable Game Character:
 #
@@ -51,8 +50,8 @@ class Character(pygame.sprite.Sprite):
                 # Ausgabe der Nachricht:
                 x = self.rect.x + self.rect.width/2 - self.messagedisplay[0].get_rect().width/2 # mittelzentriert
                 y = self.rect.y - self.messagedisplay[0].get_rect().height - 5 # texthöhe berücksichtigen
-                x = min(globalconf.game_dimensions[0] - self.messagedisplay[0].get_rect().width - 2, max(2, x)) # clamp to border
-                y = min(globalconf.game_dimensions[1] - self.messagedisplay[0].get_rect().height - 2, max(2, y)) # clamp to border
+                x = min(surface.get_rect().width - self.messagedisplay[0].get_rect().width - 2, max(2, x)) # clamp to border
+                y = min(surface.get_rect().height - self.messagedisplay[0].get_rect().height - 2, max(2, y)) # clamp to border
                 surface.blit( self.messagedisplay[0], (x,y) ) # auf die angegebene Surface kopieren
         # Neue Nachricht zur Ausgabe vorbereiten:
         if len( self.messagequeue ) > 0 and self.messagedisplay == None: # Noch Nachrichten in der Queue und Platz dafür?

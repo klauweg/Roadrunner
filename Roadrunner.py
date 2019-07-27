@@ -5,13 +5,12 @@ import pytmx
 from pytmx.util_pygame import load_pygame
 
 from character import Character
-import globalconf   # Globale Variable über Modulgrenzen hinweg
 
 # initialize pygame
 pygame.init()
 
 # create game display
-game_display = pygame.display.set_mode( globalconf.game_dimensions )
+game_display = pygame.display.set_mode( (640,640) )
 
 # Load the Maps:
 # Das funktioniert erst nach dem Game Display init (wegen Videomode)
