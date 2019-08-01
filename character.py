@@ -13,32 +13,37 @@ class Character(pygame.sprite.Sprite):
     def __init__(self, image, x, y, speedx, speedy):
         pygame.sprite.Sprite.__init__(self)        # Call the parent class (Sprite) constructor
         self.image = image
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x,y)
-        self.speedx = speedx
-        self.speedy = speedy
-        self.x = self.rect.x
-        self.y = self.rect.y
-        self.oldx = self.x
-        self.oldy = self.y
+        self.rect = self.image.get_rect() # rectgröße ermitteln
+        self.rect.topleft = (x,y)         # startposition setzen
+        self.speedx = speedx   # kann float sein!
+        self.speedy = speedy   # kann float sein!
+        self.x = self.rect.x   # float position mit pixelposition initialiseren
+        self.y = self.rect.y   # float position mit pixelposition initialisieren
+        self.oldx = self.x     # alte float position (für undo) initialisieren
+        self.oldy = self.y     # alte float position (für undo) initialisieren
         self.messagequeue = []
         self.messagedisplay = None
     def update(self): # Neue Position aufgrund der gesetzten Geschwindigkeit ermitteln
-        if self.x !=0 or self.y != 0:
+        # Nur für Objekte mit Geschwindigkeit ausführen:
+        if self.speedx !=0 or self.speedy != 0:
             self.oldx = self.x
             self.oldy = self.y
             self.x = self.x + self.speedx
             self.y = self.y + self.speedy
-            self.rect.x = int(self.x)
+            self.rect.x = int(self.x)  # neue pixelposition
             self.rect.y = int(self.y)
-    def moveby(self, x, y): # Um einen bestimmten Vektor verschieben
+    def moveby(self, x, y): # Um einen bestimmten Vektor verschieben (geht auch float)
         self.oldx = self.x
         self.oldy = self.y
         self.x = self.x + x
         self.y = self.y + y
+        self.rect.x = int(self.x)  # neue pixelposition
+        self.rect.y = int(self.y)
     def undo(self):          # Letzte Bewegung rückgängig machen
         self.x = self.oldx
         self.y = self.oldy
+        self.rect.x = int(self.x)  # neue pixelposition
+        self.rect.y = int(self.y)
     def queuemessage(self, message, time):  # Anzuzeigende Message in der Queue speichern
         self.messagequeue.insert( 0, ( message, time ) )
     def drawmessage( self, surface ):      # Per Frame aufrufen um die Messages auszugeben

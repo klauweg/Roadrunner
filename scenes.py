@@ -86,7 +86,7 @@ class Level1( Scene ):
     
     
         # Update Methode aller Sprites in allen Gruppen aufrufen:
-        # ( Neue Position wird berechnet )
+        # ( Neue Position anhand der Geschwindigkeit wird berechnet )
         for spritegroup in self.spritegroups.values():
             spritegroup.update()
         
@@ -97,9 +97,8 @@ class Level1( Scene ):
             hit.queuemessage("aua!!",200)
         
         # Spielfeldbegrenzung:
-        for sprite in self.spritegroups['player']:    # Nachrichten ausgeben
+        for sprite in self.spritegroups['player']:
             if not self.game_display.get_rect().contains( sprite.rect ):
-                print ("!")
                 sprite.undo()
         
         # Hintergrund aufs Gamedisplay kopieren
