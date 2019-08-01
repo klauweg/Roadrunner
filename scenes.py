@@ -101,6 +101,17 @@ class Level1( Scene ):
             if not self.game_display.get_rect().contains( sprite.rect ):
                 sprite.undo()
         
+        # Bounce on Wall:
+        maxx = self.game_display.get_rect().width - 16
+        maxy = self.game_display.get_rect().height - 16
+        for sprite in self.spritegroups['npc']:
+            if sprite.rect.x < 0 or sprite.rect.x > maxx:
+                sprite.undo()
+                sprite.speedx = -sprite.speedx
+            if sprite.rect.y < 0 or sprite.rect.y > maxy:
+                sprite.undo()
+                sprite.speedy = -sprite.speedy
+        
         # Hintergrund aufs Gamedisplay kopieren
         self.game_display.blit(self.background_surf, (0,0))
     
