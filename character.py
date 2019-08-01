@@ -54,7 +54,7 @@ class Character(pygame.sprite.Sprite):
                 y = min(surface.get_rect().height - self.messagedisplay[0].get_rect().height - 2, max(2, y)) # clamp to border
                 surface.blit( self.messagedisplay[0], (x,y) ) # auf die angegebene Surface kopieren
         # Neue Nachricht zur Ausgabe vorbereiten:
-        if len( self.messagequeue ) > 0 and self.messagedisplay == None: # Noch Nachrichten in der Queue und Platz dafür?
+        elif len( self.messagequeue ) > 0: # Noch Nachrichten in der Queue?
             fontss = pygame.font.SysFont('Arial',15)
             self.messageStartTime = pygame.time.get_ticks() # Startzeit der neuen Message merken
             message = self.messagequeue.pop() # Oberste Nachricht aus der Queue holen (string, time)

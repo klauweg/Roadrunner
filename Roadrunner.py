@@ -11,7 +11,10 @@ import scenes
 
 ###################### Main Loop ##############################
 
+# Festlegen mit welcher Szene gestartet werden soll:
 running_scene = scenes.Level1( game_display )
+
+# Ausführen und auf Szenenwechsel bzw. Ende warten:
 while(running_scene):
     running_scene = running_scene.schedule()
     pygame.time.Clock().tick(70)

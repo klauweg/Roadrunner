@@ -13,7 +13,16 @@ class Scene(object):
     def __init__( self, game_display ):
         self.game_display = game_display
     def schedule( self ):
-        pass
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    quit()
+            if event.type == pygame.KEYUP:
+                pass
+
 
 class Level1( Scene ):
     def __init__( self, game_display ):
@@ -61,35 +70,31 @@ class Level1( Scene ):
         self.spritegroups['player'].add( self.player )
     
     def schedule( self ):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-            if event.type == pygame.KEYDOWN:
-                self.lastkey = event.key
-            if event.type == pygame.KEYUP:
-                self.lastkey = None
-
-        # Tasten verarbeiten:
-        if self.lastkey == pygame.K_ESCAPE:
-            pygame.quit()
-            quit()
-        elif self.lastkey == pygame.K_LEFT:
+        # Aufrufen der Elternmethode:
+        super().schedule()
+        
+        # Tastaturauswertung für Spielerbewegung:
+        keys_pressed = pygame.key.get_pressed()
+        if keys_pressed[ pygame.K_LEFT ]:
             self.player.moveby( -2, 0 )
-        elif self.lastkey == pygame.K_RIGHT:
+        if keys_pressed[ pygame.K_RIGHT ]:
             self.player.moveby( 2, 0 )
-        elif self.lastkey == pygame.K_DOWN:
-            self.player.moveby( 0, 2 )
-        elif self.lastkey == pygame.K_UP:
+        if keys_pressed[ pygame.K_UP ]:
             self.player.moveby( 0, -2 )
-
+        if keys_pressed[ pygame.K_DOWN ]:
+            self.player.moveby( 0, 2 )
     
+    
+        # Update Methode aller Sprites in allen Gruppen aufrufen:
+        # ( Neue Position wird berechnet )
         for spritegroup in self.spritegroups.values():
             spritegroup.update()
         
-        self.game_display.blit(self.background_surf, (0,0)) # Hintergrund aufs Gamedisplay kopieren
+        # Hintergrund aufs Gamedisplay kopieren
+        self.game_display.blit(self.background_surf, (0,0))
     
-        for spritegroup in self.spritegroups.values():  # Objekte darstellen
+        # Objekte darstellen
+        for spritegroup in self.spritegroups.values():
             spritegroup.draw( self.game_display )
     
         for sprite in self.spritegroups['player']:    # Nachrichten ausgeben
