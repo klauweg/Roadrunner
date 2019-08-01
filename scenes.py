@@ -3,6 +3,8 @@ import pytmx
 from pytmx.util_pygame import load_pygame
 
 import random
+import numpy
+from numpy.linalg import norm
 
 from character import Character
 
@@ -56,7 +58,7 @@ class Level1( Scene ):
 
         # Erzeugen der NPCs:
         self.spritegroups['npc'] = pygame.sprite.Group()
-        for npc in range( 1, 10):
+        for npc in range( 1, 3800):
             npc_character = generate_random_npc()
             npc_character.queuemessage("Ich bin\nNPC " + str(npc), 1500 )
             self.spritegroups['npc'].add( npc_character )
@@ -90,18 +92,42 @@ class Level1( Scene ):
         for spritegroup in self.spritegroups.values():
             spritegroup.update()
         
-        # Kollisionsverarbeitung:
+        # Kollisionsverarbeitung npc -> Spieler:
         hit_list = pygame.sprite.spritecollide( self.player, self.spritegroups['npc'], False)
         for hit in hit_list:
-            print( hit )
+            hit.undo()
+            # Richtungsvektor zum Player
+            r_player = numpy.array(
+              [ (self.player.x + self.player.rect.width/2) - ( hit.x + hit.rect.width / 2 ),
+                (self.player.y + self.player.rect.height/2) - ( hit.y + hit.rect.height / 2 ) ]
+                          )
+            # Senkrechte:
+            m_rot = numpy.array( [ [0,1], [-1,0] ] )
+            v_mirror = numpy.matmul( m_rot, r_player )
+
+            # Einheitsvektor der Spiegelachse
+            v_mirror = v_mirror/norm(v_mirror)
+            
+            # Spiegelmatrix bauen:
+            m_mirror = numpy.array( [  [ v_mirror[0], v_mirror[1] ], [ v_mirror[1], -v_mirror[0] ] ] )
+            # Geschwindigkeitsvektor des npc:
+            v_npc = numpy.array( [ hit.speedx, hit.speedy ] )
+            
+            # Neuen geschwindigkeitsvektor:
+            vneu_npc = numpy.matmul( m_mirror, v_npc )
+            
+            # Neue geschwindigkeit setzen:
+            hit.speedx = vneu_npc[0]
+            hit.speedy = vneu_npc[1]
+        
             hit.queuemessage("aua!!",200)
         
-        # Spielfeldbegrenzung:
+        # Spielfeldbegrenzung für Spieler:
         for sprite in self.spritegroups['player']:
             if not self.game_display.get_rect().contains( sprite.rect ):
                 sprite.undo()
         
-        # Bounce on Wall:
+        # Bounce on Wall (Spielfeldbegrenzung für NPC):
         maxx = self.game_display.get_rect().width - 16
         maxy = self.game_display.get_rect().height - 16
         for sprite in self.spritegroups['npc']:
