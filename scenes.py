@@ -1,7 +1,9 @@
-
 import pygame
 import pytmx
 from pytmx.util_pygame import load_pygame
+
+import random
+
 from character import Character
 
 # Load the Maps:
@@ -42,31 +44,29 @@ class Level1( Scene ):
             for object in objectgroup:
                 self.spritegroups[objectgroup.name].add( Character( object.image, object.x, object.y, 0, 0 ) )
 
-        # generate some Characters:
+        # funktion zur Erstellung eines zufälligen NPC Characters:
+        def generate_random_npc():
+            npc_surf=pygame.Surface( (16,16) )
+            npc_surf.fill( pygame.Color( 164,0,0 ) )
+            x = random.randint( 30, self.game_display.get_rect().width - 30)
+            y = random.randint( 30, self.game_display.get_rect().height - 30)
+            speedx = (random.random()-0.5) * 6 
+            speedy = (random.random()-0.5) * 6
+            return Character( npc_surf, x, y, speedx, speedy )
+
+        # Erzeugen der NPCs:
         self.spritegroups['npc'] = pygame.sprite.Group()
-        player_surf=pygame.Surface( (16,16) )
-        player_surf.fill( pygame.Color( 164,0,0 ) )
-        self.npc1 = Character( player_surf, 75, 10, 0.5, 0.5 )
-        self.npc1.queuemessage("ich bin\nnpc1", 20000)
-        self.npc2 = Character( player_surf, 400, 30, 0.2, 0.1 )
-        self.npc2.queuemessage("ich bin\nnpc2", 22000)
-        self.npc3 = Character( player_surf, 100, 30, -0.2, 0.1 )
-        self.npc3.queuemessage("ich bin\nnpc3", 24000)
-        self.npc4 = Character( player_surf, 400, 300, -0.2, -0.1 )
-        self.npc4.queuemessage("ich bin\nnpc4",26000)
-        self.spritegroups['npc'].add( self.npc1 )
-        self.spritegroups['npc'].add( self.npc2 )
-        self.spritegroups['npc'].add( self.npc3 )
-        self.spritegroups['npc'].add( self.npc4 )
+        for npc in range( 1, 10):
+            npc_character = generate_random_npc()
+            npc_character.queuemessage("Ich bin\nNPC " + str(npc), 1500 )
+            self.spritegroups['npc'].add( npc_character )
 
         # The Player himself:
         self.spritegroups['player'] = pygame.sprite.Group()
         player_surf=pygame.Surface( (16,16) )
         player_surf.fill( pygame.Color( 0,164,200 ) )
         self.player = Character( player_surf, 400, 400, 0, 0 )
-        self.player.queuemessage("hallo\n2.zeile",5000)
-        self.player.queuemessage("2. nachricht",15000)
-        self.player.queuemessage("3. nachricht",15000)
+        self.player.queuemessage("Ich bin\nder Spieler",5000)
         self.spritegroups['player'].add( self.player )
     
     def schedule( self ):
@@ -89,6 +89,18 @@ class Level1( Scene ):
         # ( Neue Position wird berechnet )
         for spritegroup in self.spritegroups.values():
             spritegroup.update()
+        
+        # Kollisionsverarbeitung:
+        hit_list = pygame.sprite.spritecollide( self.player, self.spritegroups['npc'], False)
+        for hit in hit_list:
+            print( hit )
+            hit.queuemessage("aua!!",200)
+        
+        # Spielfeldbegrenzung:
+        for sprite in self.spritegroups['player']:    # Nachrichten ausgeben
+            if not self.game_display.get_rect().contains( sprite.rect ):
+                print ("!")
+                sprite.undo()
         
         # Hintergrund aufs Gamedisplay kopieren
         self.game_display.blit(self.background_surf, (0,0))
