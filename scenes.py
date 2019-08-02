@@ -6,11 +6,9 @@ import random
 import numpy
 from numpy.linalg import norm
 
-from character import Character
+import character
+import tile
 
-# Load the Maps:
-# Das funktioniert erst nach dem Game Display init (wegen Videomode)
-level1_map = load_pygame("Level1.tmx")
 
 # Base Class:
 class Scene(object):
@@ -31,20 +29,18 @@ class Scene(object):
 class Level1( Scene ):
     def __init__( self, game_display ):
         super().__init__( game_display )
-        self.lastkey = None
+
+        self.map_scene = load_pygame("Maps/Level1.tmx") # load data with Surfaces
         
-        # create background surface aus der Tilemap
-        self.background_surf = pygame.Surface((20*32, 20*32))
-        for x, y, gid in level1_map.get_layer_by_name("Kachelebene"):
-            image = level1_map.get_tile_image_by_gid( gid ) # Hier wird die tmx gid verwendet um die Grafik zu bekommen
-            self.background_surf.blit(image, (32*x, 32*y))    # Grafik auf den Hintergrund an die entsprechende Stelle kopieren
+        self.group_background = tile.layer2spritegroup( self.map_scene, "Grasebene")
+        self.group_mauern = tile.layer2spritegroup( self.map_scene, "Mauerebene")
 
         # create sprite groups aus der Tilemap
         self.spritegroups={}
-        for objectgroup in level1_map.objectgroups:
+        for objectgroup in self.map_scene.objectgroups:
             self.spritegroups[objectgroup.name]=pygame.sprite.Group()
             for object in objectgroup:
-                self.spritegroups[objectgroup.name].add( Character( object.image, object.x, object.y, 0, 0 ) )
+                self.spritegroups[objectgroup.name].add( character.Character( object.image, object.x, object.y, 0, 0 ) )
 
         # funktion zur Erstellung eines zufälligen NPC Characters:
         def generate_random_npc():
@@ -54,11 +50,11 @@ class Level1( Scene ):
             y = random.randint( 30, self.game_display.get_rect().height - 30)
             speedx = (random.random()-0.5) * 6 
             speedy = (random.random()-0.5) * 6
-            return Character( npc_surf, x, y, speedx, speedy )
+            return character.Character( npc_surf, x, y, speedx, speedy )
 
         # Erzeugen der NPCs:
         self.spritegroups['npc'] = pygame.sprite.Group()
-        for npc in range( 1, 3800):
+        for npc in range( 1, 40):
             npc_character = generate_random_npc()
             npc_character.queuemessage("Ich bin\nNPC " + str(npc), 1500 )
             self.spritegroups['npc'].add( npc_character )
@@ -67,7 +63,7 @@ class Level1( Scene ):
         self.spritegroups['player'] = pygame.sprite.Group()
         player_surf=pygame.Surface( (16,16) )
         player_surf.fill( pygame.Color( 0,164,200 ) )
-        self.player = Character( player_surf, 400, 400, 0, 0 )
+        self.player = character.Character( player_surf, 400, 400, 0, 0 )
         self.player.queuemessage("Ich bin\nder Spieler",5000)
         self.spritegroups['player'].add( self.player )
     
@@ -93,9 +89,9 @@ class Level1( Scene ):
             spritegroup.update()
         
         # Kollisionsverarbeitung npc -> Spieler:
-        hit_list = pygame.sprite.spritecollide( self.player, self.spritegroups['npc'], False)
+        hit_list = pygame.sprite.spritecollide( self.player, self.spritegroups['npc'],
+                                               False, pygame.sprite.collide_circle_ratio(1.5))
         for hit in hit_list:
-            hit.undo()
             # Richtungsvektor zum Player
             r_player = numpy.array(
               [ (self.player.x + self.player.rect.width/2) - ( hit.x + hit.rect.width / 2 ),
@@ -119,7 +115,10 @@ class Level1( Scene ):
             # Neue geschwindigkeit setzen:
             hit.speedx = vneu_npc[0]
             hit.speedy = vneu_npc[1]
-        
+            
+            hit.undo()
+
+
             hit.queuemessage("aua!!",200)
         
         # Spielfeldbegrenzung für Spieler:
@@ -137,10 +136,10 @@ class Level1( Scene ):
             if sprite.rect.y < 0 or sprite.rect.y > maxy:
                 sprite.undo()
                 sprite.speedy = -sprite.speedy
+                
+        self.group_background.draw( self.game_display )
+        self.group_mauern.draw( self.game_display )
         
-        # Hintergrund aufs Gamedisplay kopieren
-        self.game_display.blit(self.background_surf, (0,0))
-    
         # Objekte darstellen
         for spritegroup in self.spritegroups.values():
             spritegroup.draw( self.game_display )
