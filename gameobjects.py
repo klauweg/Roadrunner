@@ -1,5 +1,7 @@
 
 import pygame
+import pytmx
+
 
 # Invent a moveable Game Character:
 #
@@ -70,3 +72,36 @@ class Character(pygame.sprite.Sprite):
             for i in range(0, len(lines_surf)): # traverse over lines index
                 message_surf.blit( lines_surf[i], (0, i*fontss.get_linesize() ) ) # Zeilen auf Messagesurface mit Abstand blit
             self.messagedisplay = ( message_surf.subsurface( message_surf.get_bounding_rect() ), message[1] ) # Zuschneiden
+
+
+# Aus einem tiled Object wird ein Sprite ( Character ) erzeugt:
+def object2character( tmx_map, objectname ):
+    object = tmx_map.get_object_by_name( objectname )
+    return Character( object.image, object.x, object.y, 0, 0 )
+
+####################### Kacheln ####################################################
+
+# Kachelklasse definieren:
+class Tile(pygame.sprite.Sprite):
+    def __init__(self, image, x, y):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        
+# Aus einem tiled Object wird ein Sprite ( Tile ) erzeugt:
+def object2tile( tmx_map, objectname ):
+    object = tmx_map.get_object_by_name( objectname )
+    return Tile( object.image, object.x, object.y )
+
+# Spritegroup aus tiled Kachellayer erzeugen:
+def layer2tilegroup( tmx_map, layername ):
+    spritegroup = pygame.sprite.Group() # Neues Spritegroup Layer erzeugen
+    tilewidth = tmx_map.tilewidth
+    tileheight = tmx_map.tileheight
+    for x, y, image in tmx_map.get_layer_by_name( layername ).tiles():
+        spritegroup.add( Tile( image, x*tilewidth, y*tileheight ) )
+    return spritegroup
+                        
