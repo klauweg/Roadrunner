@@ -2,6 +2,7 @@
 import pygame
 import pytmx
 
+from math import sqrt
 
 # Invent a moveable Game Character:
 #
@@ -74,14 +75,16 @@ class Character(pygame.sprite.Sprite):
             self.messagedisplay = ( message_surf.subsurface( message_surf.get_bounding_rect() ), message[1] ) # Zuschneiden
 
 
-# Aus einem tiled Object wird ein Sprite ( Character ) erzeugt:
+# Diese Funktion erzeugt aus einer Tiled Map und einem Objektnamen
+# einen (moveable) Character:
 def object2character( tmx_map, objectname ):
     object = tmx_map.get_object_by_name( objectname )
     return Character( object.image, object.x, object.y, 0, 0 )
 
-####################### Kacheln ####################################################
+####################### Unbewegliche Objekte #####################################
 
-# Kachelklasse definieren:
+# Entsprechend der Character Klasse, wird hier eine Spriteklasse
+# erzeugt, welche aber nicht für bewegliche Objekte vorgesehen ist:
 class Tile(pygame.sprite.Sprite):
     def __init__(self, image, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -91,12 +94,14 @@ class Tile(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         
-# Aus einem tiled Object wird ein Sprite ( Tile ) erzeugt:
+# Diese Funktion erzeugt aus einer Tiled Map und einem Objektnamen
+# ein unbewegliches Tile:
 def object2tile( tmx_map, objectname ):
     object = tmx_map.get_object_by_name( objectname )
     return Tile( object.image, object.x, object.y )
 
-# Spritegroup aus tiled Kachellayer erzeugen:
+# Diese Funktion erzeugt aus einer Tiled Map und einem Layernamen
+# eine Spritegruppe unbeweglicher Tiles:
 def layer2tilegroup( tmx_map, layername ):
     spritegroup = pygame.sprite.Group() # Neues Spritegroup Layer erzeugen
     tilewidth = tmx_map.tilewidth
@@ -105,3 +110,60 @@ def layer2tilegroup( tmx_map, layername ):
         spritegroup.add( Tile( image, x*tilewidth, y*tileheight ) )
     return spritegroup
                         
+###################### Geometrie ###########################################
+
+# Berechnet das Zentrum eines Rects:
+def v_center( rect ):
+    x = rect.x + rect.width / 2
+    y = rect.y + rect.height / 2
+    return ( x, y )
+
+# Berechnet den Richtungsvektor zwischen zwei Ortsvektoren:
+def v_dir( ov1, ov2 ):
+    ov1x, ov1y = ov1
+    ov2x, ov2y = ov2
+    x = ov2x - ov1x
+    y = ov2y - ov1y
+    return ( x, y )
+
+# Berechnet den Richtungsvektor zweier kollidierender Objekte:
+# Vom Zentrum des ersten Objekts zum Zentrum des Collisionrects
+def v_collision( obj1, obj2 ):
+    intersection = obj1.rect.clip( obj2.rect )
+    return v_dir( v_center(obj1.rect), v_center(intersection) )
+
+# Senkrechten Vektor berechnen:
+# entspricht: ( 0  -1 )
+#             ( 1  0  )
+def v_ortho( vektor ):
+    x,y = vektor
+    return ( -y, x )
+
+# Einheitsvektor berechnen:
+def v_norm( vektor ):
+    x,y = vektor
+    laenge = sqrt( x*x + y*y )
+    x = x / laenge
+    y = y / laenge
+    return ( x,y )
+
+# Vektor an Vektor spiegeln
+# entspricht: ( mx   my ) * ( vx )
+#             ( my   -mx )   ( vy )
+def v_mirror( v_mirror, vektor ):
+    mx, my = v_mirror
+    x, y = vektor
+    x = mx * x + my * y
+    y = my * x + -mx * y
+    return ( x, y )
+
+# Lässt ein Objekt am anderen abprallen:
+def bounce( object, hindernis ):
+    direction_of_collision = v_collision( object, hindernis )
+    mirror_plane = v_norm( v_ortho( direction_of_collision ) )
+    newspeedx, newspeedy = v_mirror( mirror_plane, (object.speedx, object.speedy) )
+    object.speedx = newspeedx
+    object.speedy = newspeedy
+
+
+    
