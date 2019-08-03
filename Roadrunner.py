@@ -108,9 +108,9 @@ spritegroups['player'] = pygame.sprite.Group()
 player_surf=pygame.Surface( (16,16) )
 player_surf.fill( pygame.Color( 0,164,200 ) )
 player = Character( player_surf, 400, 400, 0, 0 )
-player.queuemessage("Hallo ich bin Felix\nich werde dich durch\ndieses Game führen!",3000)
-player.queuemessage("Am besten du erkundest\nerst ein mal alles",2000)
-player.queuemessage("Viel Spaß",1000)
+player.queuemessage("hallo\n2.zeile",5000)
+player.queuemessage("2. nachricht",15000)
+player.queuemessage("3. nachricht",15000)
 spritegroups['player'].add( player )
 
 
