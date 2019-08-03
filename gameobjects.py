@@ -2,7 +2,7 @@
 import pygame
 import pytmx
 
-from math import sqrt
+from math import sqrt, acos, pi, atan, sin, cos, tan
 
 # Invent a moveable Game Character:
 #
@@ -132,31 +132,45 @@ def v_ortho( vektor ):
     x,y = vektor
     return ( -y, x )
 
+# Betrag eines Vektors berechnen:
+def v_abs( vektor ):
+    x,y = vektor
+    return sqrt( x*x + y*y )
+
 # Einheitsvektor berechnen:
 def v_norm( vektor ):
     x,y = vektor
-    laenge = sqrt( x*x + y*y )
+    laenge = v_abs( vektor )
     x = x / laenge
     y = y / laenge
     return ( x,y )
 
-# Vektor an Vektor spiegeln
-# entspricht: ( mx   my ) * ( vx )
-#             ( my   -mx )   ( vy )
-def v_mirror( v_mirror, vektor ):
-    mx, my = v_mirror
-    x, y = vektor
-    x = mx * x + my * y
-    y = my * x + -mx * y
-    return ( x, y )
+# Winkel zwischen zwei Vektoren berechnen:
+def v_diff_ang( vektor1, vektor2 ):
+    ax, ay = vektor1
+    bx, by = vektor2
+    sp = ax*bx + ay*by # Skalarprodukt
+    winkel = acos( sp / ( v_abs( vektor1 ) * v_abs( vektor2 ) ) )
+    return winkel
+
+# winkel eines Vektors:
+# tangens ist hier blöd wegen Definitionslücke
+def v_ang( vektor ):
+    print( vektor )
+    return acos( vektor[0] / v_abs( vektor ) )
+
+# vektor an winkel spiegeln:
+def v_mirror( vektor, angle ):
+    print( vektor )
+    x,y = vektor
+    xneu = cos(2*angle) * x + sin(2*angle) * y
+    yneu = sin(2*angle) * x - cos(2*angle) * y
+    return (xneu, yneu)
 
 # Lässt ein Objekt am anderen abprallen:
 def bounce( object, hindernis ):
     direction_of_collision = v_collision( object, hindernis )
-    mirror_plane = v_norm( v_ortho( direction_of_collision ) )
-    newspeedx, newspeedy = v_mirror( mirror_plane, (object.speedx, object.speedy) )
-    object.speedx = newspeedx
-    object.speedy = newspeedy
-
-
+    print( "dir of coll:"+ str(direction_of_collision) )
+    mirror_angle = v_ang ( v_ortho( direction_of_collision ) )
+    object.speedx, object.speedy = v_mirror( (object.speedx, object.speedy), mirror_angle )
     
