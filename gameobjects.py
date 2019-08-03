@@ -36,13 +36,6 @@ class Character(pygame.sprite.Sprite):
             self.y = self.y + self.speedy
             self.rect.x = int(self.x)  # neue pixelposition
             self.rect.y = int(self.y)
-    def moveby(self, x, y): # Um einen bestimmten Vektor verschieben (geht auch float)
-        self.oldx = self.x
-        self.oldy = self.y
-        self.x = self.x + x
-        self.y = self.y + y
-        self.rect.x = int(self.x)  # neue pixelposition
-        self.rect.y = int(self.y)
     def undo(self):          # Letzte Bewegung rückgängig machen
         self.x = self.oldx
         self.y = self.oldy

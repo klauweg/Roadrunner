@@ -11,6 +11,16 @@ from gameobjects import *
 class Scene(object):
     def __init__( self, game_display ):
         self.game_display = game_display
+        
+        # Den spieler erzeugen wir für alle Level:
+        player_surf=pygame.Surface( (16,16) )
+        player_surf.fill( pygame.Color( 0,164,200 ) )
+        self.character_player = Character( player_surf, 400, 400, 0, 0 )
+        self.character_player.queuemessage("Lets go!",5000)
+        self.group_player = pygame.sprite.Group()
+        self.group_player.add( self.character_player )
+        self.character_player.speed = 2
+        
     def schedule( self ):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -21,20 +31,27 @@ class Scene(object):
                     quit()
             if event.type == pygame.KEYUP:
                 pass
-            
-        player_speed = 2
-        # Tastaturauswertung für Spielerbewegung:
+
+        # Hier berechnen wir den neuen Geschwindikeitsvektor
+        # des Spielers aus Schwindikeitsbetrag und Tastenzustand:
+        speedx = 0
+        speedy = 0
         keys_pressed = pygame.key.get_pressed()
-        self.movex = 0
-        self.movey = 0
         if keys_pressed[ pygame.K_LEFT ]:
-            self.movex = self.movex - player_speed
+            speedx = speedx - self.character_player.speed
         if keys_pressed[ pygame.K_RIGHT ]:
-            self.movex = self.movex + player_speed
+            speedx = speedx + self.character_player.speed
         if keys_pressed[ pygame.K_UP ]:
-            self.movey = self.movey - player_speed
+            speedy = speedy - self.character_player.speed
         if keys_pressed[ pygame.K_DOWN ]:
-            self.movey = self.movey + player_speed
+            speedy = speedy + self.character_player.speed
+        self.character_player.speedx = speedx
+        self.character_player.speedy = speedy
+        
+        
+        # Der Spieler wird immer neu berechnet:
+        self.character_player.update()
+
 
 ############################### Level 1 ##########################
 
@@ -42,6 +59,7 @@ class Level1( Scene ):
     def __init__( self, game_display ):
         super().__init__( game_display )
 
+        self.character_player.speed = 2.5
         self.map_scene = load_pygame("Maps/Level1.tmx") # load data with Surfaces
         
         self.group_background = layer2tilegroup( self.map_scene, "Grasebene")
@@ -71,13 +89,6 @@ class Level1( Scene ):
             npc_character.queuemessage("Ich bin\nNPC " + str(npc), 1500 )
             self.group_npcs.add( npc_character )
 
-        # The Player himself:
-        self.group_player = pygame.sprite.Group()
-        player_surf=pygame.Surface( (16,16) )
-        player_surf.fill( pygame.Color( 0,164,200 ) )
-        self.character_player = Character( player_surf, 400, 400, 0, 0 )
-        self.character_player.queuemessage("Ich bin\nder Spieler",5000)
-        self.group_player.add( self.character_player )
 
 
 
@@ -85,13 +96,9 @@ class Level1( Scene ):
         # Aufrufen der Elternmethode:
         super().schedule()
         
-        # Player anhand der Tastatursteuerung bewegen:
-        self.character_player.moveby( self.movex, self.movey )
-    
         # Update Methode aller Sprites in allen Gruppen aufrufen:
         # ( Neue Position anhand der Geschwindigkeit wird berechnet )
         self.group_npcs.update()
-        self.group_player.update()
 
         # Spielfeldbegrenzung für Spieler:
         if not self.game_display.get_rect().contains( self.character_player.rect ):
