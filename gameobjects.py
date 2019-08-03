@@ -156,12 +156,10 @@ def v_diff_ang( vektor1, vektor2 ):
 # winkel eines Vektors:
 # tangens ist hier blöd wegen Definitionslücke
 def v_ang( vektor ):
-    print( vektor )
     return acos( vektor[0] / v_abs( vektor ) )
 
 # vektor an winkel spiegeln:
 def v_mirror( vektor, angle ):
-    print( vektor )
     x,y = vektor
     xneu = cos(2*angle) * x + sin(2*angle) * y
     yneu = sin(2*angle) * x - cos(2*angle) * y
@@ -170,7 +168,9 @@ def v_mirror( vektor, angle ):
 # Lässt ein Objekt am anderen abprallen:
 def bounce( object, hindernis ):
     direction_of_collision = v_collision( object, hindernis )
-    print( "dir of coll:"+ str(direction_of_collision) )
+    if direction_of_collision == (0,0):
+        print( "Objekte Deckungsgleich....." )
+        return # Objekte deckungsgleich, div. by zero.....
     mirror_angle = v_ang ( v_ortho( direction_of_collision ) )
     object.speedx, object.speedy = v_mirror( (object.speedx, object.speedy), mirror_angle )
     

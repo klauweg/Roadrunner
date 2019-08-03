@@ -52,6 +52,11 @@ class Scene(object):
         # Der Spieler wird immer neu berechnet:
         self.character_player.update()
 
+        # Spielfeldbegrenzung für Spieler:
+        # (sollte normal nicht vorkommen, weil das Spielfeld durch
+        # Wände o.ä. begrenzt ist. Nur zur Sicherheit:
+        if not self.game_display.get_rect().contains( self.character_player.rect ):
+            self.character_player.undo()
 
 ############################### Level 1 ##########################
 
@@ -78,8 +83,8 @@ class Level1( Scene ):
             npc_surf.fill( pygame.Color( 164,0,0 ) )
             x = random.randint( 30, self.game_display.get_rect().width - 30)
             y = random.randint( 30, self.game_display.get_rect().height - 30)
-            speedx = (random.random()-0.5) * 6 
-            speedy = (random.random()-0.5) * 6
+            speedx = (random.random()-0.5) * 16 
+            speedy = (random.random()-0.5) * 16
             return Character( npc_surf, x, y, speedx, speedy )
 
         # Erzeugen der NPCs:
@@ -100,9 +105,6 @@ class Level1( Scene ):
         # ( Neue Position anhand der Geschwindigkeit wird berechnet )
         self.group_npcs.update()
 
-        # Spielfeldbegrenzung für Spieler:
-        if not self.game_display.get_rect().contains( self.character_player.rect ):
-            self.character_player.undo()
 
 
 
@@ -110,31 +112,25 @@ class Level1( Scene ):
         hit_list = pygame.sprite.spritecollide( self.character_player,
                                                self.group_npcs,
                                                False )
-        for hit in hit_list:
+        for npc in hit_list:
             # Richtungsvektor zum Player
-            bounce( hit, self.character_player )
-            hit.undo()
-            hit.update()
-            hit.update()
-            hit.queuemessage("aua!!",200)
+            bounce( npc, self.character_player )
+            npc.undo()
+            npc.update()
+#            npc.update()
+            npc.queuemessage("aua!!",200)
             
             
         # Kollision npc mit wand
         for npc in self.group_npcs:
-            hit_list = pygame.sprite.spritecollide( npc, self.group_mauern, False )
-            
+            hit_list = pygame.sprite.spritecollide( npc, 
+                                                   self.group_mauern,
+                                                   False )
             # Iteration über die berührten Wandkacheln:
             for hit in hit_list:
-                if hit.rect.x > npc.rect.x + npc.rect.width:
-                    npc.speedx = -abs(npc.speedx)
-                if hit.rect.x + hit.rect.width < npc.rect.x:
-                    npc.speedx = abs(npc.speedx)
-                if hit.rect.y > npc.rect.y + npc.rect.width:
-                    npc.speedy = -abs(npc.speedy)
-                if hit.rect.y + hit.rect.height < npc.rect.y:
-                    npc.speedy = abs(npc.speedy)
-                
-                
+                bounce( npc, hit )
+                npc.undo()
+                npc.update()
         
         
         # Bounce on Wall (Spielfeldbegrenzung für NPC):
