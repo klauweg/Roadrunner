@@ -83,15 +83,20 @@ class Level1( Scene ):
             npc_surf.fill( pygame.Color( 164,0,0 ) )
             x = random.randint( 30, self.game_display.get_rect().width - 30)
             y = random.randint( 30, self.game_display.get_rect().height - 30)
-            speedx = (random.random()-0.5) * 2 
-            speedy = (random.random()-0.5) * 2
+            speedx = (random.random()-0.5) * 6
+            speedy = (random.random()-0.5) * 6
             return Character( npc_surf, x, y, speedx, speedy )
 
         # Erzeugen der NPCs:
         self.group_npcs = pygame.sprite.Group()
-        for npc in range( 1, 40):
+        for npc in range( 1, 20):
             npc_character = generate_random_npc()
             npc_character.queuemessage("Ich bin\nNPC " + str(npc), 1500 )
+#            npc_character.x = 350
+#            npc_character.y = 40
+#            npc_character.speedx = 2
+#            npc_character.speedy = 2
+
             self.group_npcs.add( npc_character )
 
 
@@ -124,8 +129,6 @@ class Level1( Scene ):
         # Kollision npc mit wand
         for npc in self.group_npcs:
             bounce( npc, self.group_mauern )
-            npc.undo()
-            npc.update()
         
         
         # Bounce on Wall (Spielfeldbegrenzung für NPC):

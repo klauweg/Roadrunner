@@ -18,5 +18,6 @@ running_scene = scenes.Level1( game_display )
 while(running_scene):
     running_scene = running_scene.schedule()
     pygame.time.Clock().tick(70)
+#    pygame.time.Clock().tick(3)
     pygame.display.update()
 

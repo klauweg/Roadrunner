@@ -119,12 +119,6 @@ def v_dir( ov1, ov2 ):
     y = ov2y - ov1y
     return ( x, y )
 
-# Berechnet den Richtungsvektor zweier kollidierender Objekte:
-# Vom Zentrum des ersten Objekts zum Zentrum des Collisionrects
-def v_collision( obj, rect ):
-    intersection = obj.rect.clip( rect )
-    return v_dir( v_center(obj.rect), v_center(intersection) )
-
 # Senkrechten Vektor berechnen:
 # entspricht: ( 0  -1 )
 #             ( 1  0  )
@@ -146,6 +140,8 @@ def v_norm( vektor ):
     return ( x,y )
 
 # Winkel zwischen zwei Vektoren berechnen:
+# (Geht logischerweise nur bis 180°, Drehsinn ist egal,
+#  Ergebnis ist immer positiv)
 def v_diff_ang( vektor1, vektor2 ):
     ax, ay = vektor1
     bx, by = vektor2
@@ -154,36 +150,48 @@ def v_diff_ang( vektor1, vektor2 ):
     return winkel
 
 # winkel eines Vektors:
+# (winkel zwischen Vektor und positiver x-Achse)
 # tangens ist hier blöd wegen Definitionslücke
+# Ergebnis immer positiv, max. 180°
 def v_ang( vektor ):
     return acos( vektor[0] / v_abs( vektor ) )
 
 # vektor an winkel spiegeln:
+# Das scheint für 0<= angle <= 180° zu funktionieren
 def v_mirror( vektor, angle ):
     x,y = vektor
     xneu = cos(2*angle) * x + sin(2*angle) * y
     yneu = sin(2*angle) * x - cos(2*angle) * y
     return (xneu, yneu)
 
+# Berechnet den Richtungsvektor zweier kollidierender Objekte:
+# Vom Zentrum des ersten Objekts zum Zentrum des Collisionrects
+def v_collision( object, obstacle ):
+    intersection = object.rect.clip( obstacle.rect )
+    return v_dir( v_center(object.rect), v_center(intersection) )
+
 # Lässt ein Objekt von einer SpriteGruppe abprallen:
 def bounce( object, spritegroup ):
-    hit_list = pygame.sprite.spritecollide( object, spritegroup, False )
+    obstacle_list = pygame.sprite.spritecollide( object, spritegroup, False )
     
-    if hit_list == []: # Keine Kollision
-        return
+    if obstacle_list == []: # Keine Kollision
+        return # dann gleich beenden
 
+    # Wir bearbeiten immer nur das erste Hindernis der Liste (rest rekursiv)
+    obstacle = obstacle_list[0]
+
+    # Bestimmung des Richtungsvektors vom Obejkt zum Berührpunkt
+    direction_of_collision = v_collision( object, obstacle )
     
-    newrect = hit_list[0].rect
-    for hit in hit_list[1:]:
-        newrect = newrect.union( hit.rect ) # obacht mit "in_place"!!!!
-        
-    direction_of_collision = v_collision( object, newrect )
-    if direction_of_collision == (0,0):
-        print( "Objekte Deckungsgleich....." )
-        return # Objekte deckungsgleich, div. by zero.....
-    mirror_angle = v_ang ( v_ortho( direction_of_collision ) )
-    object.speedx, object.speedy = v_mirror( (object.speedx, object.speedy), mirror_angle )
-
+    # Nur falls das Objekt nicht genau auf dem Berührpunkt steht:
+    # (sonst division by Zero)
+    if direction_of_collision != (0,0):
+        # Drehwinkel ermitteln:
+        mirror_angle = v_ang ( v_ortho( direction_of_collision ) )
+        # Bewegungsvektor spiegeln:
+        object.speedx, object.speedy = v_mirror( (object.speedx, object.speedy), pi-mirror_angle )
+    # Letzte Bewegung rückgängig machen
     object.undo()
+    
     object.update()
     
