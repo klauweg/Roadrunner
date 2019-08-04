@@ -121,9 +121,9 @@ def v_dir( ov1, ov2 ):
 
 # Berechnet den Richtungsvektor zweier kollidierender Objekte:
 # Vom Zentrum des ersten Objekts zum Zentrum des Collisionrects
-def v_collision( obj1, obj2 ):
-    intersection = obj1.rect.clip( obj2.rect )
-    return v_dir( v_center(obj1.rect), v_center(intersection) )
+def v_collision( obj, rect ):
+    intersection = obj.rect.clip( rect )
+    return v_dir( v_center(obj.rect), v_center(intersection) )
 
 # Senkrechten Vektor berechnen:
 # entspricht: ( 0  -1 )
@@ -165,12 +165,25 @@ def v_mirror( vektor, angle ):
     yneu = sin(2*angle) * x - cos(2*angle) * y
     return (xneu, yneu)
 
-# Lässt ein Objekt am anderen abprallen:
-def bounce( object, hindernis ):
-    direction_of_collision = v_collision( object, hindernis )
+# Lässt ein Objekt von einer SpriteGruppe abprallen:
+def bounce( object, spritegroup ):
+    hit_list = pygame.sprite.spritecollide( object, spritegroup, False )
+    
+    if hit_list == []: # Keine Kollision
+        return
+
+    
+    newrect = hit_list[0].rect
+    for hit in hit_list[1:]:
+        newrect = newrect.union( hit.rect ) # obacht mit "in_place"!!!!
+        
+    direction_of_collision = v_collision( object, newrect )
     if direction_of_collision == (0,0):
         print( "Objekte Deckungsgleich....." )
         return # Objekte deckungsgleich, div. by zero.....
     mirror_angle = v_ang ( v_ortho( direction_of_collision ) )
     object.speedx, object.speedy = v_mirror( (object.speedx, object.speedy), mirror_angle )
+
+    object.undo()
+    object.update()
     
