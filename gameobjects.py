@@ -4,6 +4,8 @@ import pytmx
 
 from math import sqrt, acos, pi, atan, sin, cos, tan
 
+fontss = pygame.font.SysFont('Arial',15)
+
 # Invent a moveable Game Character:
 #
 # image: surface welche die Grafik des Characters enthält
@@ -25,7 +27,6 @@ class Character(pygame.sprite.Sprite):
         self.y = self.rect.y   # float position mit pixelposition initialisieren
         self.oldx = self.x     # alte float position (für undo) initialisieren
         self.oldy = self.y     # alte float position (für undo) initialisieren
-        self.messagequeue = []
         self.messagedisplay = None
     def update(self): # Neue Position aufgrund der gesetzten Geschwindigkeit ermitteln
         # Nur für Objekte mit Geschwindigkeit ausführen:
@@ -41,8 +42,15 @@ class Character(pygame.sprite.Sprite):
         self.y = self.oldy
         self.rect.x = int(self.x)  # neue pixelposition
         self.rect.y = int(self.y)
-    def queuemessage(self, message, time):  # Anzuzeigende Message in der Queue speichern
-        self.messagequeue.insert( 0, ( message, time ) )
+    def showmessage(self, message, time):
+        self.messageStartTime = pygame.time.get_ticks() # Startzeit der neuen Message merken
+        lines = message.split("\n")[:3] # Nachricht in Zeilen aufteilen, die ersten drei Zeilen verwenden
+        lines_surf = [ fontss.render(line[:20], True, (0,0,0) ) for line in lines ] # Render ersten 20 zeichen pro Zeile
+        message_surf = pygame.Surface( (300, 50), pygame.SRCALPHA ) # Alpha Surface für maximalen Platzbedarf erzeugen
+        for i in range(0, len(lines_surf)): # traverse over lines index
+            message_surf.blit( lines_surf[i], (0, i*fontss.get_linesize() ) ) # Zeilen auf Messagesurface mit Abstand blit
+        message_surf = message_surf.subsurface( message_surf.get_bounding_rect() ) # anscheinend teuer!!
+        self.messagedisplay = ( message_surf, time )
     def drawmessage( self, surface ):      # Per Frame aufrufen um die Messages auszugeben
         # Aktuelle Nachricht bearbeiten:
         if self.messagedisplay != None:  # Wird gerade eine Nachricht angezeigt?
@@ -55,18 +63,6 @@ class Character(pygame.sprite.Sprite):
                 x = min(surface.get_rect().width - self.messagedisplay[0].get_rect().width - 2, max(2, x)) # clamp to border
                 y = min(surface.get_rect().height - self.messagedisplay[0].get_rect().height - 2, max(2, y)) # clamp to border
                 surface.blit( self.messagedisplay[0], (x,y) ) # auf die angegebene Surface kopieren
-        # Neue Nachricht zur Ausgabe vorbereiten:
-        elif len( self.messagequeue ) > 0: # Noch Nachrichten in der Queue?
-            fontss = pygame.font.SysFont('Arial',15)
-            self.messageStartTime = pygame.time.get_ticks() # Startzeit der neuen Message merken
-            message = self.messagequeue.pop() # Oberste Nachricht aus der Queue holen (string, time)
-            lines = message[0].split("\n")[:3] # Nachricht in Zeilen aufteilen, die ersten drei Zeilen verwenden
-            lines_surf = [ fontss.render(line[:20], True, (0,0,0) ) for line in lines ] # Render ersten 20 zeichen pro Zeile
-            message_surf = pygame.Surface( (300, 50), pygame.SRCALPHA ) # Alpha Surface für maximalen Platzbedarf erzeugen
-            for i in range(0, len(lines_surf)): # traverse over lines index
-                message_surf.blit( lines_surf[i], (0, i*fontss.get_linesize() ) ) # Zeilen auf Messagesurface mit Abstand blit
-            self.messagedisplay = ( message_surf.subsurface( message_surf.get_bounding_rect() ), message[1] ) # Zuschneiden
-
 
 # Diese Funktion erzeugt aus einer Tiled Map und einem Objektnamen
 # einen (moveable) Character:
@@ -172,7 +168,8 @@ def v_collision( object, obstacle ):
 
 # Lässt ein Objekt von einer SpriteGruppe abprallen:
 def bounce( object, spritegroup ):
-    obstacle_list = pygame.sprite.spritecollide( object, spritegroup, False )
+    obstacle_list = pygame.sprite.spritecollide( object, spritegroup, False, 
+                                pygame.sprite.collide_circle_ratio(0.85))
     
     if obstacle_list == []: # Keine Kollision
         return # dann gleich beenden
@@ -180,18 +177,17 @@ def bounce( object, spritegroup ):
     # Wir bearbeiten immer nur das erste Hindernis der Liste (rest rekursiv)
     obstacle = obstacle_list[0]
 
-    # Bestimmung des Richtungsvektors vom Obejkt zum Berührpunkt
+    # Bestimmung des Richtungsvektors vom Objekt zum Berührpunkt
     direction_of_collision = v_collision( object, obstacle )
     
     # Nur falls das Objekt nicht genau auf dem Berührpunkt steht:
     # (sonst division by Zero)
     if direction_of_collision != (0,0):
-        # Drehwinkel ermitteln:
+        # Winkel der Spiegelachse ermitteln:
         mirror_angle = v_ang ( v_ortho( direction_of_collision ) )
-        # Bewegungsvektor spiegeln:
-        object.speedx, object.speedy = v_mirror( (object.speedx, object.speedy), pi-mirror_angle )
+        # Bewegungsvektor spiegeln: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! pi-?????
+        object.speedx, object.speedy = v_mirror( (object.speedx, object.speedy), mirror_angle )
+
     # Letzte Bewegung rückgängig machen
     object.undo()
-    
-    object.update()
-    
+#    bounce( object, spritegroup )

@@ -16,7 +16,7 @@ class Scene(object):
         player_surf=pygame.Surface( (16,16) )
         player_surf.fill( pygame.Color( 0,164,200 ) )
         self.character_player = Character( player_surf, 400, 400, 0, 0 )
-        self.character_player.queuemessage("Lets go!",5000)
+        self.character_player.showmessage("Lets go!",5000)
         self.group_player = pygame.sprite.Group()
         self.group_player.add( self.character_player )
         self.character_player.speed = 2
@@ -83,15 +83,15 @@ class Level1( Scene ):
             npc_surf.fill( pygame.Color( 164,0,0 ) )
             x = random.randint( 30, self.game_display.get_rect().width - 30)
             y = random.randint( 30, self.game_display.get_rect().height - 30)
-            speedx = (random.random()-0.5) * 6
-            speedy = (random.random()-0.5) * 6
+            speedx = (random.random()-0.5) * 3
+            speedy = (random.random()-0.5) * 3
             return Character( npc_surf, x, y, speedx, speedy )
 
         # Erzeugen der NPCs:
         self.group_npcs = pygame.sprite.Group()
-        for npc in range( 1, 20):
+        for npc in range( 1, 60):
             npc_character = generate_random_npc()
-            npc_character.queuemessage("Ich bin\nNPC " + str(npc), 1500 )
+            npc_character.showmessage("Ich bin\nNPC " + str(npc), 1500 )
 #            npc_character.x = 350
 #            npc_character.y = 40
 #            npc_character.speedx = 2
@@ -114,21 +114,21 @@ class Level1( Scene ):
 
 
         # Kollisionsverarbeitung npc -> Spieler:
-        hit_list = pygame.sprite.spritecollide( self.character_player,
-                                               self.group_npcs,
-                                               False )
-        for npc in hit_list:
-            # Richtungsvektor zum Player
+        for npc in self.group_npcs:
+            bounce( npc, self.group_player )
+
+#        for npc in hit_list:
+#            # Richtungsvektor zum Player
 #            bounce( npc, self.character_player )
-            npc.undo()
-            npc.update()
+#            npc.undo()
 #            npc.update()
-            npc.queuemessage("aua!!",200)
+#            npc.update()
+#            npc.queuemessage("aua!!",200)
             
             
         # Kollision npc mit wand
-        for npc in self.group_npcs:
-            bounce( npc, self.group_mauern )
+#        for npc in self.group_npcs:
+#            bounce( npc, self.group_mauern )
         
         
         # Bounce on Wall (Spielfeldbegrenzung für NPC):
@@ -142,7 +142,9 @@ class Level1( Scene ):
                 sprite.undo()
                 sprite.speedy = -sprite.speedy
 
-
+        for npc in self.group_npcs:
+            npc.showmessage( "{0:.2f} {1:.2f}".format(npc.speedx, npc.speedy), 100 )
+        
         # Objekte rendern:
         self.group_background.draw( self.game_display )
         self.group_mauern.draw( self.game_display )
