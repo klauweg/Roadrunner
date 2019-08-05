@@ -161,10 +161,10 @@ def v_mirror( vektor, angle ):
     return (xneu, yneu)
 
 # Berechnet den Richtungsvektor zweier kollidierender Objekte:
-# Vom Zentrum des ersten Objekts zum Zentrum des Collisionrects
+# Vom Zentrum des ersten Objekts zum Zentrum des zweiten
 def v_collision( object, obstacle ):
-    intersection = object.rect.clip( obstacle.rect )
-    return v_dir( v_center(object.rect), v_center(intersection) )
+    doc = v_dir( v_center(object.rect), v_center(obstacle.rect) )
+    return doc
 
 # Lässt ein Objekt von einer SpriteGruppe abprallen:
 def bounce( object, spritegroup ):
@@ -187,6 +187,8 @@ def bounce( object, spritegroup ):
         mirror_angle = v_ang ( v_ortho( direction_of_collision ) )
         # Bewegungsvektor spiegeln: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! pi-?????
         object.speedx, object.speedy = v_mirror( (object.speedx, object.speedy), mirror_angle )
+
+#    print( "object: {0}, obstacle: {1}, doc: {2}".format(object.rect, obstacle.rect, doc) )
 
     # Letzte Bewegung rückgängig machen
     object.undo()
