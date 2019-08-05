@@ -15,10 +15,14 @@ import scenes
 # Festlegen mit welcher Szene gestartet werden soll:
 running_scene = scenes.Level1( game_display )
 
+last_ticks = pygame.time.get_ticks()
 # Ausführen und auf Szenenwechsel bzw. Ende warten:
 while(running_scene):
     running_scene = running_scene.schedule()
     game_clock.tick(60)
-    print( game_clock.get_fps() )
     pygame.display.update()
 
+    now_ticks = pygame.time.get_ticks()
+    if now_ticks-last_ticks > 2000:
+        print( "FPS: {0:.2f}".format(game_clock.get_fps()) )
+        last_ticks = now_ticks
