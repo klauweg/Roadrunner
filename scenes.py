@@ -89,7 +89,7 @@ class Level1( Scene ):
 
         # Erzeugen der NPCs:
         self.group_npcs = pygame.sprite.Group()
-        for npc in range( 1, 60):
+        for npc in range( 1, 80):
             npc_character = generate_random_npc()
             npc_character.showmessage("Ich bin\nNPC " + str(npc), 1500 )
 #            npc_character.x = 350
@@ -143,7 +143,7 @@ class Level1( Scene ):
                 sprite.speedy = -sprite.speedy
 
         for npc in self.group_npcs:
-            npc.showmessage( "{0:.2f} {1:.2f}".format(npc.speedx, npc.speedy), 100 )
+            npc.showmessage( "{0:.2f} {1:.2f}\n{2:.2f} {3:.2f}".format(npc.speedx, npc.speedy,npc.x,npc.y), 100 )
         
         # Objekte rendern:
         self.group_background.draw( self.game_display )

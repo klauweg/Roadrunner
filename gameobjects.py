@@ -46,10 +46,10 @@ class Character(pygame.sprite.Sprite):
         self.messageStartTime = pygame.time.get_ticks() # Startzeit der neuen Message merken
         lines = message.split("\n")[:3] # Nachricht in Zeilen aufteilen, die ersten drei Zeilen verwenden
         lines_surf = [ fontss.render(line[:20], True, (0,0,0) ) for line in lines ] # Render ersten 20 zeichen pro Zeile
-        message_surf = pygame.Surface( (300, 50), pygame.SRCALPHA ) # Alpha Surface für maximalen Platzbedarf erzeugen
+        max_width = max( [ surface.get_rect().width for surface in lines_surf ] ) # breiteste Zeile bestimmen
+        message_surf = pygame.Surface( (max_width, len(lines)*fontss.get_linesize()), pygame.SRCALPHA ) # Alpha Surface für maximalen Platzbedarf erzeugen
         for i in range(0, len(lines_surf)): # traverse over lines index
             message_surf.blit( lines_surf[i], (0, i*fontss.get_linesize() ) ) # Zeilen auf Messagesurface mit Abstand blit
-        message_surf = message_surf.subsurface( message_surf.get_bounding_rect() ) # anscheinend teuer!!
         self.messagedisplay = ( message_surf, time )
     def drawmessage( self, surface ):      # Per Frame aufrufen um die Messages auszugeben
         # Aktuelle Nachricht bearbeiten:
@@ -59,7 +59,7 @@ class Character(pygame.sprite.Sprite):
             else:
                 # Ausgabe der Nachricht:
                 x = self.rect.x + self.rect.width/2 - self.messagedisplay[0].get_rect().width/2 # mittelzentriert
-                y = self.rect.y - self.messagedisplay[0].get_rect().height - 5 # texthöhe berücksichtigen
+                y = self.rect.y - self.messagedisplay[0].get_rect().height # texthöhe berücksichtigen
                 x = min(surface.get_rect().width - self.messagedisplay[0].get_rect().width - 2, max(2, x)) # clamp to border
                 y = min(surface.get_rect().height - self.messagedisplay[0].get_rect().height - 2, max(2, y)) # clamp to border
                 surface.blit( self.messagedisplay[0], (x,y) ) # auf die angegebene Surface kopieren
