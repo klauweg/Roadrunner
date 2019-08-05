@@ -92,10 +92,10 @@ class Level1( Scene ):
         for npc in range( 1, 2):
             npc_character = generate_random_npc()
             npc_character.showmessage("Ich bin\nNPC " + str(npc), 1500 )
-            npc_character.x = 399.34
-            npc_character.y = 383.03
-            npc_character.speedx = 1.33
-            npc_character.speedy = 1.29
+            npc_character.x = 413.18
+            npc_character.y = 390.96
+            npc_character.speedx = -0.83
+            npc_character.speedy = 0.46
 
             self.group_npcs.add( npc_character )
 
@@ -117,14 +117,6 @@ class Level1( Scene ):
         for npc in self.group_npcs:
             bounce( npc, self.group_player )
 
-#        for npc in hit_list:
-#            # Richtungsvektor zum Player
-#            bounce( npc, self.character_player )
-#            npc.undo()
-#            npc.update()
-#            npc.update()
-#            npc.queuemessage("aua!!",200)
-            
             
         # Kollision npc mit wand
 #        for npc in self.group_npcs:
