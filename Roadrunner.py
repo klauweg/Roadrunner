@@ -21,8 +21,16 @@ while(running_scene):
     running_scene = running_scene.schedule()
     game_clock.tick(60)
     pygame.display.update()
-
+    
+    # Framerate ausgeben:
     now_ticks = pygame.time.get_ticks()
     if now_ticks-last_ticks > 2000:
         print( "FPS: {0:.2f}".format(game_clock.get_fps()) )
         last_ticks = now_ticks
+        
+    # Mit Spacetaste anhalten:
+    while pygame.key.get_pressed()[ pygame.K_SPACE ]:
+        pygame.event.get() # anscheinend nötig für get_pressed()
+        if pygame.key.get_pressed()[ pygame.K_b ]:
+            pygame.quit()
+            

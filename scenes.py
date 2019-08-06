@@ -47,8 +47,7 @@ class Scene(object):
             speedy = speedy + self.character_player.speed
         self.character_player.speedx = speedx
         self.character_player.speedy = speedy
-        
-        
+
         # Der Spieler wird immer neu berechnet:
         self.character_player.update()
 

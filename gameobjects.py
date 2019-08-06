@@ -146,9 +146,17 @@ def v_diff_ang( vektor1, vektor2 ):
 # winkel eines Vektors:
 # (winkel zwischen Vektor und positiver x-Achse)
 # tangens ist hier blöd wegen Definitionslücke
-# Ergebnis immer positiv, max. 180°
+# so geht es für 0 <= alpha <=180°
 def v_ang( vektor ):
-    return acos( vektor[0] / v_abs( vektor ) )
+    x,y = vektor
+    # Für den 3. und 4. Quadranten punktspiegeln wir das in den
+    # 1. und 2., damit die Winkelberechnung mit acos auch für
+    # Vektorwinkel >180° geht. Für die spätere Spiegelachse
+    # ist es egal.
+    if y < 0:
+        x = -x
+        y = -y
+    return acos( x / v_abs( vektor ) )
 
 # vektor an winkel spiegeln:
 # Das scheint für 0<= angle <= 180° zu funktionieren
@@ -166,41 +174,40 @@ def bounce( object, spritegroup ):
     
     if obstacle_list == []: # Keine Kollision
         return # dann gleich beenden
+    
+    print("round")
 
-    # Wir bearbeiten immer nur das erste Hindernis der Liste
-    obstacle = obstacle_list[0]
+    for obstacle in obstacle_list:
 
-    # Bestimmung des Richtungsvektors vom Objekt zum Hindernis:
-    doc_v = v_dir( object.rect.center, obstacle.rect.center )
+        # Bestimmung des Richtungsvektors vom Objekt zum Hindernis:
+        doc_v = v_dir( object.rect.center, obstacle.rect.center )
 
-    # Falls die Objektzentren genau aufeinanderliegen:
-    if doc_v == (0,0):
-        print( "Objekte deckungsgleich!")
-        return
+        # Falls die Objektzentren genau aufeinanderliegen:
+        if doc_v == (0,0):
+            print( "Objekte deckungsgleich!")
+            continue
 
-    # Falls sich die Objekte berühren, aber sich voneinander entfernen
-    # oder aneinander vorbeigleiten (skalarprodukt <= 0):
-    if v_sprod( doc_v, (object.speedx, object.speedy) ) <= 0:
-        print( "Objekte entfernen sich schon!")
-        return
+        # Falls sich die Objekte berühren, aber sich voneinander entfernen
+        # oder aneinander vorbeigleiten (skalarprodukt <= 0):
+        if v_sprod( doc_v, (object.speedx, object.speedy) ) <= 0:
+            print( "Objekte entfernen sich schon!")
+            continue
 
+        print( "doc: {0}, speedx: {1}, speedy: {2}, x:{3}, y:{4}".format(
+                    doc_v, object.speedx, object.speedy, object.x, object.y ) )
 
-    print( "doc: {0}, speedx: {1}, speedy: {2}, x:{3}, y:{4}".format(
-    doc_v, object.speedx, object.speedy, object.x, object.y ) )
+        # Winkel der Spiegelachse ermitteln:
+        mirror_angle = v_ang ( v_ortho( doc_v ) )
+        # Bewegungsvektor spiegeln:
+        object.speedx, object.speedy = v_mirror( (object.speedx, object.speedy), mirror_angle )
+#        mirror_angle = pi - mirror_angle
+        print( "doc: {0}, speedx: {1}, speedy: {2}, x:{3}, y:{4}, angle:{5}".format(
+          doc_v, object.speedx, object.speedy, object.x, object.y, mirror_angle/2/pi*360) )
 
-    # Winkel der Spiegelachse ermitteln:
-    mirror_angle = v_ang ( v_ortho( doc_v ) )
-    # Bewegungsvektor spiegeln:
-    object.speedx, object.speedy = v_mirror( (object.speedx, object.speedy), mirror_angle )
-    mirror_angle = pi - mirror_angle
-    print( "doc: {0}, speedx: {1}, speedy: {2}, x:{3}, y:{4}, angle:{5}".format(
-    doc_v, object.speedx, object.speedy, object.x, object.y, mirror_angle/2/pi*360) )
-
-    print("")
-    # Falls sich die Objekte trotz rückgängig gemachter letzer Bewegung noch
-    # berühren:
-#    while pygame.sprite.spritecollide( object, [obstacle], False, 
-#                                pygame.sprite.collide_circle_ratio(0.85)):
-#        print( "Rettungsvesuch" )
-#        object.update()
+        print("")
+        # Falls sich die Objekte trotz rückgängig gemachter letzer Bewegung noch
+        # berühren:
+        #    while pygame.sprite.spritecollide( object, [obstacle], False, 
+        #                                pygame.sprite.collide_circle_ratio(0.85)):
+        #        print( "Rettungsvesuch" )
 
