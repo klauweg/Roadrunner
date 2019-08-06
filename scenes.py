@@ -55,8 +55,8 @@ class Scene(object):
         # Spielfeldbegrenzung für Spieler:
         # (sollte normal nicht vorkommen, weil das Spielfeld durch
         # Wände o.ä. begrenzt ist. Nur zur Sicherheit:
-        if not self.game_display.get_rect().contains( self.character_player.rect ):
-            self.character_player.undo()
+#        if not self.game_display.get_rect().contains( self.character_player.rect ):
+#            self.character_player.undo()
 
 ############################### Level 1 ##########################
 
@@ -92,11 +92,21 @@ class Level1( Scene ):
         for npc in range( 1, 2):
             npc_character = generate_random_npc()
             npc_character.showmessage("Ich bin\nNPC " + str(npc), 1500 )
-            npc_character.x = 413.18
-            npc_character.y = 390.96
-            npc_character.speedx = -0.83
-            npc_character.speedy = 0.46
+#            npc_character.x = 413.18
+#            npc_character.y = 390.96
+#            npc_character.speedx = -0.83
+#            npc_character.speedy = 0.46
 
+            npc_character.x = 62.49098848471184
+            npc_character.y = 370.68700014033345
+            npc_character.speedx = -0.7328463760230861
+            npc_character.speedy = -0.6028566903915378
+
+#            npc_character.x = 66.91117240414037
+#            npc_character.y = 433.7199460534908
+#            npc_character.speedx = 0.050260603241950315
+#            npc_character.speedy = 0.9476148330211829
+            
             self.group_npcs.add( npc_character )
 
 
@@ -119,8 +129,8 @@ class Level1( Scene ):
 
             
         # Kollision npc mit wand
-#        for npc in self.group_npcs:
-#            bounce( npc, self.group_mauern )
+        for npc in self.group_npcs:
+            bounce( npc, self.group_mauern )
         
         
         # Bounce on Wall (Spielfeldbegrenzung für NPC):
@@ -128,14 +138,13 @@ class Level1( Scene ):
         maxy = self.game_display.get_rect().height - 16
         for sprite in self.group_npcs:
             if sprite.rect.x < 0 or sprite.rect.x > maxx:
-                sprite.undo()
                 sprite.speedx = -sprite.speedx
             if sprite.rect.y < 0 or sprite.rect.y > maxy:
-                sprite.undo()
                 sprite.speedy = -sprite.speedy
 
         for npc in self.group_npcs:
-            npc.showmessage( "{0:.2f} {1:.2f}\n{2:.2f} {3:.2f}".format(npc.speedx, npc.speedy,npc.x,npc.y), 100 )
+            npc.showmessage( "{0:.2f} {1:.2f}\n{2:.2f} {3:.2f}".format(
+                   npc.speedx, npc.speedy,npc.x,npc.y), 100 )
         
         # Objekte rendern:
         self.group_background.draw( self.game_display )

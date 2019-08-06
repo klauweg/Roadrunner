@@ -28,32 +28,27 @@ class Character(pygame.sprite.Sprite):
         self.speedy = speedy   # kann float sein!
         self.x = self.rect.x   # float position mit pixelposition initialiseren
         self.y = self.rect.y   # float position mit pixelposition initialisieren
-        self.oldx = self.x     # alte float position (für undo) initialisieren
-        self.oldy = self.y     # alte float position (für undo) initialisieren
         self.messagedisplay = None
+        
     def update(self): # Neue Position aufgrund der gesetzten Geschwindigkeit ermitteln
         # Nur für Objekte mit Geschwindigkeit ausführen:
         if self.speedx !=0 or self.speedy != 0:
-            self.oldx = self.x
-            self.oldy = self.y
             self.x = self.x + self.speedx
             self.y = self.y + self.speedy
             self.rect.x = int(self.x)  # neue pixelposition
             self.rect.y = int(self.y)
-    def undo(self):          # Letzte Bewegung rückgängig machen
-        self.x = self.oldx
-        self.y = self.oldy
-        self.rect.x = int(self.x)  # neue pixelposition
-        self.rect.y = int(self.y)
+            
     def showmessage(self, message, time):
         self.messageStartTime = pygame.time.get_ticks() # Startzeit der neuen Message merken
-        lines = message.split("\n")[:3] # Nachricht in Zeilen aufteilen, die ersten drei Zeilen verwenden
-        lines_surf = [ fontss.render(line[:20], True, (0,0,0) ) for line in lines ] # Render ersten 20 zeichen pro Zeile
-        max_width = max( [ surface.get_rect().width for surface in lines_surf ] ) # breiteste Zeile bestimmen
-        message_surf = pygame.Surface( (max_width, len(lines)*fontss.get_linesize()), pygame.SRCALPHA ) # Alpha Surface für maximalen Platzbedarf erzeugen
-        for i in range(0, len(lines_surf)): # traverse over lines index
-            message_surf.blit( lines_surf[i], (0, i*fontss.get_linesize() ) ) # Zeilen auf Messagesurface mit Abstand blit
-        self.messagedisplay = ( message_surf, time )
+        linesize = fontss.get_linesize()
+        textlines = message.split("\n")[:3] # Nachricht in Zeilen aufteilen, die ersten drei Zeilen verwenden
+        surfacelines = [ fontss.render(line[:20], True, (0,0,0) ) for line in textlines ] # Render ersten 20 zeichen pro Zeile
+        max_width = max( [ surface.get_rect().width for surface in surfacelines ] ) # breiteste Zeile bestimmen
+        messagesurface = pygame.Surface( (max_width, len(textlines)*linesize), pygame.SRCALPHA ) # Alpha Surface für maximalen Platzbedarf erzeugen
+        for i,surfaceline in enumerate( surfacelines ):
+            messagesurface.blit( surfaceline, (0, i*linesize ) ) # Zeilen auf Messagesurface mit Abstand blit
+        self.messagedisplay = ( messagesurface, time )
+        
     def drawmessage( self, surface ):      # Per Frame aufrufen um die Messages auszugeben
         # Aktuelle Nachricht bearbeiten:
         if self.messagedisplay != None:  # Wird gerade eine Nachricht angezeigt?
@@ -104,11 +99,6 @@ def layer2tilegroup( tmx_map, layername ):
                         
 ###################### Geometrie ###########################################
 
-# Berechnet das Zentrum eines Rects:
-def v_center( rect ):
-    x = rect.x + rect.width / 2
-    y = rect.y + rect.height / 2
-    return ( x, y )
 
 # Berechnet den Richtungsvektor zwischen zwei Ortsvektoren:
 def v_dir( ov1, ov2 ):
@@ -168,11 +158,6 @@ def v_mirror( vektor, angle ):
     yneu = sin(2*angle) * x - cos(2*angle) * y
     return (xneu, yneu)
 
-# Berechnet den Richtungsvektor zweier kollidierender Objekte:
-# Vom Zentrum des ersten Objekts zum Zentrum des zweiten
-def v_collision( object, obstacle ):
-    doc = v_dir( v_center(object.rect), v_center(obstacle.rect) )
-    return doc
 
 # Lässt ein Objekt von einer SpriteGruppe abprallen:
 def bounce( object, spritegroup ):
@@ -185,34 +170,37 @@ def bounce( object, spritegroup ):
     # Wir bearbeiten immer nur das erste Hindernis der Liste
     obstacle = obstacle_list[0]
 
-    # Bestimmung des Richtungsvektors vom Objekt zum Berührpunkt
-    direction_of_collision = v_collision( object, obstacle )
+    # Bestimmung des Richtungsvektors vom Objekt zum Hindernis:
+    doc_v = v_dir( object.rect.center, obstacle.rect.center )
 
     # Falls die Objektzentren genau aufeinanderliegen:
-    if direction_of_collision == (0,0):
+    if doc_v == (0,0):
         print( "Objekte deckungsgleich!")
         return
 
     # Falls sich die Objekte berühren, aber sich voneinander entfernen
     # oder aneinander vorbeigleiten (skalarprodukt <= 0):
-    if v_sprod( direction_of_collision, (object.speedx, object.speedy) ) <= 0:
+    if v_sprod( doc_v, (object.speedx, object.speedy) ) <= 0:
         print( "Objekte entfernen sich schon!")
         return
-    
+
+
+    print( "doc: {0}, speedx: {1}, speedy: {2}, x:{3}, y:{4}".format(
+    doc_v, object.speedx, object.speedy, object.x, object.y ) )
+
     # Winkel der Spiegelachse ermitteln:
-    mirror_angle = v_ang ( v_ortho( direction_of_collision ) )
+    mirror_angle = v_ang ( v_ortho( doc_v ) )
     # Bewegungsvektor spiegeln:
     object.speedx, object.speedy = v_mirror( (object.speedx, object.speedy), mirror_angle )
+    mirror_angle = pi - mirror_angle
+    print( "doc: {0}, speedx: {1}, speedy: {2}, x:{3}, y:{4}, angle:{5}".format(
+    doc_v, object.speedx, object.speedy, object.x, object.y, mirror_angle/2/pi*360) )
 
-    print( "doc: {0}, speedx: {1}, speedy: {2}, angle: {3}".format(
-    direction_of_collision, object.speedx, object.speedy, mirror_angle/2/pi*360) )
-
-    # Letzte Bewegung rückgängig machen
-    object.undo()
+    print("")
     # Falls sich die Objekte trotz rückgängig gemachter letzer Bewegung noch
     # berühren:
-    while pygame.sprite.spritecollide( object, [obstacle], False, 
-                                pygame.sprite.collide_circle_ratio(0.85)):
-        print( "Rettungsvesuch" )
-        object.update()
+#    while pygame.sprite.spritecollide( object, [obstacle], False, 
+#                                pygame.sprite.collide_circle_ratio(0.85)):
+#        print( "Rettungsvesuch" )
+#        object.update()
 
