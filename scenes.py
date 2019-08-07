@@ -88,24 +88,13 @@ class Level1( Scene ):
 
         # Erzeugen der NPCs:
         self.group_npcs = pygame.sprite.Group()
-        for npc in range( 1, 2):
+        for npc in range( 1, 40):
             npc_character = generate_random_npc()
             npc_character.showmessage("Ich bin\nNPC " + str(npc), 1500 )
 #            npc_character.x = 413.18
 #            npc_character.y = 390.96
 #            npc_character.speedx = -0.83
 #            npc_character.speedy = 0.46
-
-            npc_character.x = 62.49098848471184
-            npc_character.y = 370.68700014033345
-            npc_character.speedx = -0.7328463760230861
-            npc_character.speedy = -0.6028566903915378
-
-#            npc_character.x = 66.91117240414037
-#            npc_character.y = 433.7199460534908
-#            npc_character.speedx = 0.050260603241950315
-#            npc_character.speedy = 0.9476148330211829
-            
             self.group_npcs.add( npc_character )
 
 
@@ -141,10 +130,6 @@ class Level1( Scene ):
             if sprite.rect.y < 0 or sprite.rect.y > maxy:
                 sprite.speedy = -sprite.speedy
 
-        for npc in self.group_npcs:
-            npc.showmessage( "{0:.2f} {1:.2f}\n{2:.2f} {3:.2f}".format(
-                   npc.speedx, npc.speedy,npc.x,npc.y), 100 )
-        
         # Objekte rendern:
         self.group_background.draw( self.game_display )
         self.group_mauern.draw( self.game_display )
