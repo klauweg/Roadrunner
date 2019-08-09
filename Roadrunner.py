@@ -13,7 +13,7 @@ import scenes
 ###################### Main Loop ##############################
 
 # Festlegen mit welcher Szene gestartet werden soll:
-running_scene = scenes.Level1( game_display )
+running_scene = scenes.Level1( game_display, "Maps/Level1.tmx" )
 
 last_ticks = pygame.time.get_ticks()
 # Ausführen und auf Szenenwechsel bzw. Ende warten:

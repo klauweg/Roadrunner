@@ -160,14 +160,15 @@ def v_mirror( vektor, angle ):
 
 
 # Lässt ein Objekt von einer SpriteGruppe abprallen:
-def bounce( object, spritegroup ):
+# gibt False zurück, wenn keine Kollision stattgefunden hat
+def bounce( object, spritegroup, debug=False, debug1=False ):
+    collision = False
     obstacle_list = pygame.sprite.spritecollide( object, spritegroup, False ) 
     
     if obstacle_list == []: # Keine Kollision
-        return # dann gleich beenden
-    
-#    print("round")
+        return collision # dann gleich beenden
 
+    collision = True
     for obstacle in obstacle_list:
 
         # Bestimmung des Richtungsvektors vom Objekt zum Hindernis:
@@ -175,30 +176,30 @@ def bounce( object, spritegroup ):
 
         # Falls die Objektzentren genau aufeinanderliegen:
         if doc_v == (0,0):
-            print( "Objekte deckungsgleich!")
+            if debug:
+                print( "Objekte deckungsgleich!")
             continue
 
         # Falls sich die Objekte berühren, aber sich voneinander entfernen
         # oder aneinander vorbeigleiten (skalarprodukt <= 0):
         if v_sprod( doc_v, (object.speedx, object.speedy) ) <= 0:
-#            print( "Objekte entfernen sich schon!")
+            if debug1:
+                print( "Objekte entfernen sich schon!")
             continue
 
-#        print( "doc: {0}, speedx: {1}, speedy: {2}, x:{3}, y:{4}".format(
-#                    doc_v, object.speedx, object.speedy, object.x, object.y ) )
+        if debug:
+            print( "doc: {0}, speedx: {1}, speedy: {2}, x:{3}, y:{4}".format(
+                    doc_v, object.speedx, object.speedy, object.x, object.y ) )
 
         # Winkel der Spiegelachse ermitteln:
         mirror_angle = v_ang ( v_ortho( doc_v ) )
         # Bewegungsvektor spiegeln:
         object.speedx, object.speedy = v_mirror( (object.speedx, object.speedy), mirror_angle )
-        
-#        print( "doc: {0}, speedx: {1}, speedy: {2}, x:{3}, y:{4}, angle:{5}".format(
-#          doc_v, object.speedx, object.speedy, object.x, object.y, mirror_angle/2/pi*360) )
 
-#        print("")
-        # Falls sich die Objekte trotz rückgängig gemachter letzer Bewegung noch
-        # berühren:
-        #    while pygame.sprite.spritecollide( object, [obstacle], False, 
-        #                                pygame.sprite.collide_circle_ratio(0.85)):
-        #        print( "Rettungsvesuch" )
+        if debug:
+            print( "doc: {0}, speedx: {1}, speedy: {2}, x:{3}, y:{4}, angle:{5}".format(
+                   doc_v, object.speedx, object.speedy, object.x, object.y, mirror_angle/2/pi*360) )
+            print( "" )
+            
+    return collision
 

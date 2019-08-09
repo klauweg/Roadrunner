@@ -15,7 +15,7 @@ class Scene(object):
         # Den spieler erzeugen wir für alle Level:
         player_surf=pygame.Surface( (16,16) )
         player_surf.fill( pygame.Color( 0,164,200 ) )
-        self.character_player = Character( player_surf, 400, 400, 0, 0 )
+        self.character_player = Character( player_surf, 100, 100, 0, 0 )
         self.character_player.showmessage("Lets go!",5000)
         self.group_player = pygame.sprite.Group()
         self.group_player.add( self.character_player )
@@ -54,17 +54,26 @@ class Scene(object):
         # Spielfeldbegrenzung für Spieler:
         # (sollte normal nicht vorkommen, weil das Spielfeld durch
         # Wände o.ä. begrenzt ist. Nur zur Sicherheit:
-#        if not self.game_display.get_rect().contains( self.character_player.rect ):
-#            self.character_player.undo()
+        self.character_player.x = max(
+            0, min( self.character_player.x, self.game_display.get_rect().width - self.character_player.rect.width) )
+        self.character_player.y = max(
+            0, min( self.character_player.y, self.game_display.get_rect().height - self.character_player.rect.height) )
+
+        # Kollision Spieler mit Wand
+        while bounce( self.character_player, self.group_mauern, True ):
+            print("update")
+            self.character_player.update()
+               
+
 
 ############################### Level 1 ##########################
 
 class Level1( Scene ):
-    def __init__( self, game_display ):
+    def __init__( self, game_display, mapfile ):
         super().__init__( game_display )
 
         self.character_player.speed = 2.5
-        self.map_scene = load_pygame("Maps/Level1.tmx") # load data with Surfaces
+        self.map_scene = load_pygame( mapfile ) # load data with Surfaces
         
         self.group_background = layer2tilegroup( self.map_scene, "Grasebene")
         self.group_mauern = layer2tilegroup( self.map_scene, "Mauerebene")
@@ -88,16 +97,10 @@ class Level1( Scene ):
 
         # Erzeugen der NPCs:
         self.group_npcs = pygame.sprite.Group()
-        for npc in range( 1, 40):
+        for npc in range( 1, 20):
             npc_character = generate_random_npc()
             npc_character.showmessage("Ich bin\nNPC " + str(npc), 1500 )
-#            npc_character.x = 413.18
-#            npc_character.y = 390.96
-#            npc_character.speedx = -0.83
-#            npc_character.speedy = 0.46
             self.group_npcs.add( npc_character )
-
-
 
 
     def schedule( self ):
@@ -108,27 +111,13 @@ class Level1( Scene ):
         # ( Neue Position anhand der Geschwindigkeit wird berechnet )
         self.group_npcs.update()
 
-
-
-
         # Kollisionsverarbeitung npc -> Spieler:
         for npc in self.group_npcs:
             bounce( npc, self.group_player )
 
-            
         # Kollision npc mit wand
         for npc in self.group_npcs:
             bounce( npc, self.group_mauern )
-        
-        
-        # Bounce on Wall (Spielfeldbegrenzung für NPC):
-        maxx = self.game_display.get_rect().width - 16
-        maxy = self.game_display.get_rect().height - 16
-        for sprite in self.group_npcs:
-            if sprite.rect.x < 0 or sprite.rect.x > maxx:
-                sprite.speedx = -sprite.speedx
-            if sprite.rect.y < 0 or sprite.rect.y > maxy:
-                sprite.speedy = -sprite.speedy
 
         # Objekte rendern:
         self.group_background.draw( self.game_display )
@@ -142,5 +131,7 @@ class Level1( Scene ):
         for sprite in self.group_npcs:
             sprite.drawmessage( self.game_display )
     
+        if self.character_player.rect.colliderect( self.tile_ziel.rect ):
+            return Level1( self.game_display, "Maps/Level2.tmx" )
         return self # die aktuelle Szene soll erstmal weiter laufen
     
