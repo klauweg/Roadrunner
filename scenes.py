@@ -60,6 +60,7 @@ class Scene(object):
             0, min( self.character_player.y, self.game_display.get_rect().height - self.character_player.rect.height) )
 
         # Kollision Spieler mit Wand
+        # Das ist schlecht, weil die while Schleife hängenbleiben kann!
         while bounce( self.character_player, self.group_mauern, True ):
             print("update")
             self.character_player.update()
@@ -68,13 +69,10 @@ class Scene(object):
 
 ############################### Level 1 ##########################
 
-class Level1( Scene ):
-    def __init__( self, game_display, mapfile ):
+class Level( Scene ):
+    def __init__( self, game_display ):
         super().__init__( game_display )
 
-        self.character_player.speed = 2.5
-        self.map_scene = load_pygame( mapfile ) # load data with Surfaces
-        
         self.group_background = layer2tilegroup( self.map_scene, "Grasebene")
         self.group_mauern = layer2tilegroup( self.map_scene, "Mauerebene")
 
@@ -84,6 +82,9 @@ class Level1( Scene ):
         self.group_inout.add( self.tile_ziel )
         self.group_inout.add( self.tile_start )
         
+        # Player auf den Spawnpoint setzen:
+        self.character_player.x = self.tile_start.rect.x
+        self.character_player.y = self.tile_start.rect.y
 
         # funktion zur Erstellung eines zufälligen NPC Characters:
         def generate_random_npc():
@@ -132,6 +133,29 @@ class Level1( Scene ):
             sprite.drawmessage( self.game_display )
     
         if self.character_player.rect.colliderect( self.tile_ziel.rect ):
-            return Level1( self.game_display, "Maps/Level2.tmx" )
+            return self.get_nextlevel()
         return self # die aktuelle Szene soll erstmal weiter laufen
+
+
+class Level1( Level ):
+    def __init__( self, game_display ):
+        self.map_scene = load_pygame( "Maps/Level1.tmx" ) # load data with Surfaces
+        super().__init__( game_display )
+        self.character_player.speed = 2.5
+        
+    def get_nextlevel( self ):
+        return Level2( self.game_display )
+
+class Level2( Level ):
+    def __init__( self, game_display ):
+        self.map_scene = load_pygame( "Maps/Level2.tmx" ) # load data with Surfaces
+        super().__init__( game_display )
+        self.character_player.speed = 2.5
+        
+    def get_nextlevel( self ):
+        return Level1( self.game_display )
+
     
+
+
+        

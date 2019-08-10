@@ -26,8 +26,8 @@ class Character(pygame.sprite.Sprite):
         self.rect.topleft = (x,y)         # startposition setzen
         self.speedx = speedx   # kann float sein!
         self.speedy = speedy   # kann float sein!
-        self.x = self.rect.x   # float position mit pixelposition initialiseren
-        self.y = self.rect.y   # float position mit pixelposition initialisieren
+        self.x = x   # float position mit pixelposition initialiseren
+        self.y = y   # float position mit pixelposition initialisieren
         self.messagedisplay = None
         
     def update(self): # Neue Position aufgrund der gesetzten Geschwindigkeit ermitteln
