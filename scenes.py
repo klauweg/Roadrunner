@@ -43,22 +43,22 @@ class Level( Scene ):
         # Den Spieler erzeugen wir für alle Level auf dem spawnpoint:
         player_surf=pygame.Surface( (16,16) )
         player_surf.fill( pygame.Color( 0,164,200 ) )
-        self.character_player = Character( player_surf, self.tile_start.rect.x, self.tile_start.rect.y, 0, 0 )
+        self.character_player = Character( player_surf, self.tile_start.rect.x+8, self.tile_start.rect.y+8, 0, 0 )
         self.character_player.showmessage("Lets go!",5000)
         self.group_player = pygame.sprite.Group()
         self.group_player.add( self.character_player )
-        self.character_player.speed = 2
+        self.character_player.speed = 2 # Wird im Level ggf. überschrieben
 
         # funktion zur Erstellung eines zufälligen NPC Characters:
         def generate_random_npc():
             game_display_rect = pygame.display.get_surface().get_rect()
             npc_surf=pygame.Surface( (16,16) )
             npc_surf.fill( pygame.Color( 164,0,0 ) )
-            x = random.randint( 30, game_display_rect.width - 30)
-            y = random.randint( 30, game_display_rect.height - 30)
+            #x = random.randint( 30, game_display_rect.width - 30)
+            #y = random.randint( 30, game_display_rect.height - 30)
             speedx = (random.random()-0.5) * 3
             speedy = (random.random()-0.5) * 3
-            return Character( npc_surf, x, y, speedx, speedy )
+            return Character( npc_surf, self.tile_start.rect.x, self.tile_start.rect.y, speedx, speedy )
 
         # Erzeugen der NPCs:
         self.group_npcs = pygame.sprite.Group()
@@ -73,19 +73,17 @@ class Level( Scene ):
 
         # Hier berechnen wir den neuen Geschwindikeitsvektor
         # des Spielers aus Schwindikeitsbetrag und Tastenzustand:
-        speedx = 0
-        speedy = 0
         keys_pressed = pygame.key.get_pressed()
+        self.character_player.speedx = 0
+        self.character_player.speedy = 0
         if keys_pressed[ pygame.K_LEFT ]:
-            speedx = speedx - self.character_player.speed
+            self.character_player.speedx = - self.character_player.speed
         if keys_pressed[ pygame.K_RIGHT ]:
-            speedx = speedx + self.character_player.speed
+            self.character_player.speedx = + self.character_player.speed
         if keys_pressed[ pygame.K_UP ]:
-            speedy = speedy - self.character_player.speed
+            self.character_player.speedy = - self.character_player.speed
         if keys_pressed[ pygame.K_DOWN ]:
-            speedy = speedy + self.character_player.speed
-        self.character_player.speedx = speedx
-        self.character_player.speedy = speedy
+            self.character_player.speedy = + self.character_player.speed
 
         # Der Spieler wird immer neu berechnet:
         self.character_player.update()
