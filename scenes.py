@@ -10,15 +10,7 @@ from gameobjects import *
 # Base Class:
 class Scene(object):
     def __init__( self ):
-        
-        # Den spieler erzeugen wir für alle Level:
-        player_surf=pygame.Surface( (16,16) )
-        player_surf.fill( pygame.Color( 0,164,200 ) )
-        self.character_player = Character( player_surf, 100, 100, 0, 0 )
-        self.character_player.showmessage("Lets go!",5000)
-        self.group_player = pygame.sprite.Group()
-        self.group_player.add( self.character_player )
-        self.character_player.speed = 2
+        pass
         
     def schedule( self ):
         for event in pygame.event.get():
@@ -30,6 +22,54 @@ class Scene(object):
                     quit()
             if event.type == pygame.KEYUP:
                 pass
+
+
+class Level( Scene ):
+    def __init__( self ):
+        super().__init__()
+
+        # Tilemap laden (Die Funktion muss von den einzelnen Levels implementiert werden)
+        self.loadmap()
+
+        self.group_background = layer2tilegroup( self.map_scene, "Grasebene")
+        self.group_mauern = layer2tilegroup( self.map_scene, "Mauerebene")
+
+        self.group_inout = pygame.sprite.Group()
+        self.tile_ziel = object2tile( self.map_scene, "Ziel" )
+        self.tile_start = object2tile( self.map_scene, "Spawn" )
+        self.group_inout.add( self.tile_ziel )
+        self.group_inout.add( self.tile_start )
+
+        # Den Spieler erzeugen wir für alle Level auf dem spawnpoint:
+        player_surf=pygame.Surface( (16,16) )
+        player_surf.fill( pygame.Color( 0,164,200 ) )
+        self.character_player = Character( player_surf, self.tile_start.rect.x, self.tile_start.rect.y, 0, 0 )
+        self.character_player.showmessage("Lets go!",5000)
+        self.group_player = pygame.sprite.Group()
+        self.group_player.add( self.character_player )
+        self.character_player.speed = 2
+
+        # funktion zur Erstellung eines zufälligen NPC Characters:
+        def generate_random_npc():
+            game_display_rect = pygame.display.get_surface().get_rect()
+            npc_surf=pygame.Surface( (16,16) )
+            npc_surf.fill( pygame.Color( 164,0,0 ) )
+            x = random.randint( 30, game_display_rect.width - 30)
+            y = random.randint( 30, game_display_rect.height - 30)
+            speedx = (random.random()-0.5) * 3
+            speedy = (random.random()-0.5) * 3
+            return Character( npc_surf, x, y, speedx, speedy )
+
+        # Erzeugen der NPCs:
+        self.group_npcs = pygame.sprite.Group()
+        for npc in range( 1, 20):
+            npc_character = generate_random_npc()
+            npc_character.showmessage("Ich bin\nNPC " + str(npc), 1500 )
+            self.group_npcs.add( npc_character )
+
+    def schedule( self ):
+        # Aufrufen der Elternmethode:
+        super().schedule()
 
         # Hier berechnen wir den neuen Geschwindikeitsvektor
         # des Spielers aus Schwindikeitsbetrag und Tastenzustand:
@@ -66,49 +106,6 @@ class Scene(object):
             self.character_player.update()
                
 
-
-############################### Level 1 ##########################
-
-class Level( Scene ):
-    def __init__( self ):
-        super().__init__()
-
-        self.group_background = layer2tilegroup( self.map_scene, "Grasebene")
-        self.group_mauern = layer2tilegroup( self.map_scene, "Mauerebene")
-
-        self.group_inout = pygame.sprite.Group()
-        self.tile_ziel = object2tile( self.map_scene, "Ziel" )
-        self.tile_start = object2tile( self.map_scene, "Spawn" )
-        self.group_inout.add( self.tile_ziel )
-        self.group_inout.add( self.tile_start )
-        
-        # Player auf den Spawnpoint setzen:
-        self.character_player.x = self.tile_start.rect.x
-        self.character_player.y = self.tile_start.rect.y
-
-        # funktion zur Erstellung eines zufälligen NPC Characters:
-        def generate_random_npc():
-            game_display_rect = pygame.display.get_surface().get_rect()
-            npc_surf=pygame.Surface( (16,16) )
-            npc_surf.fill( pygame.Color( 164,0,0 ) )
-            x = random.randint( 30, game_display_rect.width - 30)
-            y = random.randint( 30, game_display_rect.height - 30)
-            speedx = (random.random()-0.5) * 3
-            speedy = (random.random()-0.5) * 3
-            return Character( npc_surf, x, y, speedx, speedy )
-
-        # Erzeugen der NPCs:
-        self.group_npcs = pygame.sprite.Group()
-        for npc in range( 1, 20):
-            npc_character = generate_random_npc()
-            npc_character.showmessage("Ich bin\nNPC " + str(npc), 1500 )
-            self.group_npcs.add( npc_character )
-
-
-    def schedule( self ):
-        # Aufrufen der Elternmethode:
-        super().schedule()
-        
         # Update Methode aller Sprites in allen Gruppen aufrufen:
         # ( Neue Position anhand der Geschwindigkeit wird berechnet )
         self.group_npcs.update()
@@ -133,7 +130,8 @@ class Level( Scene ):
         self.character_player.drawmessage( game_display )
         for sprite in self.group_npcs:
             sprite.drawmessage( game_display )
-    
+
+        # Kontakt mit dem Ziel nächstes Level zurückgeben:
         if self.character_player.rect.colliderect( self.tile_ziel.rect ):
             return self.get_nextlevel()
         return self # die aktuelle Szene soll erstmal weiter laufen
@@ -141,18 +139,22 @@ class Level( Scene ):
 
 class Level1( Level ):
     def __init__( self ):
-        self.map_scene = load_pygame( "Maps/Level1.tmx" ) # load data with Surfaces
         super().__init__()
         self.character_player.speed = 2.5
+        
+    def loadmap( self ):
+        self.map_scene = load_pygame( "Maps/Level1.tmx" ) # load data with Surfaces
         
     def get_nextlevel( self ):
         return Level2()
 
 class Level2( Level ):
     def __init__( self ):
-        self.map_scene = load_pygame( "Maps/Level2.tmx" ) # load data with Surfaces
         super().__init__()
         self.character_player.speed = 2.5
+        
+    def loadmap( self ):
+        self.map_scene = load_pygame( "Maps/Level2.tmx" ) # load data with Surfaces
         
     def get_nextlevel( self ):
         return Level1()
