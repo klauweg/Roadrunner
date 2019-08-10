@@ -5,6 +5,8 @@ pygame.init()
 
 # create game display
 game_display = pygame.display.set_mode( (640,640) )
+print( pygame.display.Info() )
+
 game_clock = pygame.time.Clock()
 
 # Eigene Module:
@@ -13,7 +15,7 @@ import scenes
 ###################### Main Loop ##############################
 
 # Festlegen mit welcher Szene gestartet werden soll:
-running_scene = scenes.Level1( game_display )
+running_scene = scenes.Level1()
 
 last_ticks = pygame.time.get_ticks()
 # Ausführen und auf Szenenwechsel bzw. Ende warten:
