@@ -99,8 +99,7 @@ class Level( Scene ):
 
         # Kollision Spieler mit Wand
         # Das ist schlecht, weil die while Schleife hängenbleiben kann!
-        while bounce( self.character_player, self.group_mauern, True ):
-            print("update")
+        while bounce( self.character_player, self.group_mauern, False ):
             self.character_player.update()
                
 
